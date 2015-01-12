@@ -30,7 +30,7 @@ public class WhatsAppManagment {
 	 * 
 	 * @return WhatsAppManagment instance
 	 */
-	public synchronized WhatsAppManagment create() {
+	public static synchronized WhatsAppManagment create() {
 		if (!_IsCreated) {
 			_WhatsAppManagment = new WhatsAppManagment();
 			_IsCreated = true;
@@ -253,6 +253,11 @@ public class WhatsAppManagment {
 	}
 
 	public boolean validateGroupManager(String headerChecker) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean validateCookie(String cookie) {
 		// TODO Auto-generated method stub
 		return false;
 	}

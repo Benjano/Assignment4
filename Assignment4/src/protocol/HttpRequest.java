@@ -25,22 +25,24 @@ public class HttpRequest {
 
 	private void parse() {
 		StringTokenizer tokenizer = new StringTokenizer(_RawMessage);
-		try {
-			_ReqeustType = RequestType.valueOf(tokenizer.nextToken());
-		} catch (Exception e) {
-			_ReqeustType = RequestType.BAD_REQUEST;
+		if (tokenizer.countTokens() >= 3) {
+			try {
+				_ReqeustType = RequestType.valueOf(tokenizer.nextToken());
+			} catch (Exception e) {
+				_ReqeustType = RequestType.BAD_REQUEST;
 
-		}
-		_Location = tokenizer.nextToken();
-		_HttpVersion = tokenizer.nextToken();
+			}
+			_Location = tokenizer.nextToken();
+			_HttpVersion = tokenizer.nextToken();
 
-		while (tokenizer.hasMoreTokens()) {
-			String headerName = tokenizer.nextToken();
-			headerName = headerName.replace(':', ' ');
-			headerName = headerName.trim();
-			if (tokenizer.hasMoreTokens()) {
-				String headerValue = tokenizer.nextToken();
-				_Headers.put(headerName, headerValue);
+			while (tokenizer.hasMoreTokens()) {
+				String headerName = tokenizer.nextToken();
+				headerName = headerName.replace(':', ' ');
+				headerName = headerName.trim();
+				if (tokenizer.hasMoreTokens()) {
+					String headerValue = tokenizer.nextToken();
+					_Headers.put(headerName, headerValue);
+				}
 			}
 		}
 	}
