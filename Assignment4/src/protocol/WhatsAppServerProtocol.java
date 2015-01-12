@@ -101,6 +101,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 			HttpRequest request, HttpResponse response) {
 
 		String headerChecker;
+		String headerChecker2;
 		boolean isOk = true;
 
 		switch (requestType) {
@@ -113,19 +114,10 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 			break;
 
 		case LOGOUT:
-			// TODO
-			response.addHeader("Goodbye", "logged out");
-			break;
+				break;
 
 		case LIST:
-			headerChecker = request.getHeader("List");
-			isOk = validateHeader(headerChecker)
-					&& (headerChecker.equals("Users")
-							| headerChecker.equals("Group") | headerChecker
-								.equals("Groups"));
-			if (!isOk) {
-				response.addHeader("ERROR 273", ErrorMessage.ERROR_273);
-			}
+		
 			break;
 
 		case CREATE_GROUP:
@@ -157,89 +149,16 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 			break;
 
 		case SEND:
-			headerChecker = request.getHeader("Type");
-			isOk = validateHeader(headerChecker);
-			if (isOk) {
-				if (headerChecker.equals("Group")) {
-					headerChecker = request.getHeader("Target");
-					isOk = validateHeader(headerChecker);
-					if (isOk) {
-						isOk = _managment.validateGroup(headerChecker);
-						if (!isOk) {
-							response.addHeader("ERROR 771",
-									ErrorMessage.ERROR_771);
-						}
-					} else {
-						response.addHeader("ERROR 711", ErrorMessage.ERROR_711);
-					}
-				} else if (headerChecker.equals("Direct")) {
-					headerChecker = request.getHeader("Target");
-					isOk = validateHeader(headerChecker);
-					if (isOk) {
-						isOk = _managment.validatePhoneNumber(headerChecker);
-						if (!isOk) {
-							response.addHeader("ERROR 771",
-									ErrorMessage.ERROR_771);
-						}
-					} else {
-						response.addHeader("ERROR 711", ErrorMessage.ERROR_711);
-					}
-				} else {
-					isOk = false;
-					response.addHeader("ERROR 836", ErrorMessage.ERROR_836);
-				}
-			}
+			
 			break;
 
 		case ADD_USER:
-			headerChecker = request.getHeader("Target");
-			if (isOk = validateHeader(headerChecker)
-					&& (isOk = _managment.validateGroup(headerChecker))) {
-				headerChecker = request.getHeader("User");
-				if (isOk = validateHeader(headerChecker)) {
-					if (isOk = _managment.validatePhoneNumber(headerChecker)) {
-						if (isOk = _managment
-								.validateGroupManager(headerChecker)) {
-							if (!(isOk = !_managment
-									.validateUserInGroup(headerChecker))) {
-								// User is already in group
-								response.addHeader("ERROR 142",
-										ErrorMessage.ERROR_142);
-							}
-						} else {
-							// User is not the group manager
-							response.addHeader("ERROR 669",
-									ErrorMessage.ERROR_669);
-						}
-					} else {
-						// User does not exists
-						response.addHeader("ERROR 242", ErrorMessage.ERROR_242);
-					}
-				} else {
-					// Missing parameters
-					response.addHeader("ERROR 242", ErrorMessage.ERROR_242);
-				}
-			} else {
-				// Group does not exists
-				response.addHeader("ERROR 770", ErrorMessage.ERROR_770);
-			}
+			
 
 			break;
 
-		case REMOVE_USER:
-			headerChecker = request.getHeader("Target");
-			isOk = validateHeader(headerChecker);
-			if (isOk) {
-				isOk = _managment.validateGroup(headerChecker);
-				headerChecker = request.getHeader("User");
-				isOk = validateHeader(headerChecker);
-				if (isOk) {
-					isOk = _managment.validatePhoneNumber(headerChecker);
-					if (isOk) {
-						isOk = _managment.validateUserInGroup(headerChecker);
-					}
-				}
-			}
+		case REMOVE_USER: // TODO
+			
 			break;
 
 		case QUEUE:
