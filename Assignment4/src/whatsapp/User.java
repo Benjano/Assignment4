@@ -24,12 +24,8 @@ public class User {
 	public User(String name, String phone) {
 		_Name = name;
 		_Phone = phone;
-<<<<<<< HEAD
-		//TODO map
-=======
 		_UserGroups = new ConcurrentHashMap<String, Group>();
 		_Messages = new ConcurrentHashMap<String, List<Message>>();
->>>>>>> branch 'master' of https://github.com/Benjano/Assignment4.git
 	}
 
 	/**
