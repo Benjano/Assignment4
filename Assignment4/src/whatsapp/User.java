@@ -22,6 +22,7 @@ public class User {
 	public User(String name, String phone) {
 		_Name = name;
 		_Phone = phone;
+		//TODO map
 	}
 
 	/**

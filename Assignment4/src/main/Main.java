@@ -13,10 +13,14 @@ public class Main {
 
 	public static void main(String[] args) {
 		HttpRequest request = new HttpRequest(
-				"POST /login.jsp HTTP/1.1\nAccept: text/html");
+				"POST /login.jsp HTTP/1.1\nAccept: text/html \nAccepat: text/html\n nir=3051231&aviv=1212\n");
 		System.out.println(request);
-
-		System.out.println(request.getHeader(""));
+		
+		System.out.println();
+		
+		
+//
+//		System.out.println(request.getHeader(""));
 
 		// POST /login.jsp HTTP/1.1
 		// Accept: text/html
@@ -28,10 +32,11 @@ public class Main {
 		// Set-Cookie: aviv@1232123
 		// UserAuth = aviv@1232123
 
-		// HttpResponse response = new HttpResponse(HttpResultCode.RESULT_OK);
-		// response.addHeader("Set-Cookie", "user_auth=1231232");
-		// response.addValue("aviv", "asido");
-		// System.out.println(response);
+		 HttpResponse response = new HttpResponse();
+		 response.setResultCode(HttpResultCode.RESULT_OK);
+		 response.addHeader("Set-Cookie", "user_auth=1231232");
+		 response.setMessage("WELCOME NIR");
+		 System.out.println(response);
 		//
 		// int c = 98;
 		// System.out.println(c);

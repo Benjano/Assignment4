@@ -1,5 +1,7 @@
 package protocol_http;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -11,13 +13,14 @@ public class HttpRequest {
 
 	private String _RawMessage;
 	private RequestType _ReqeustType;
-	private String _Location;
-	private String _HttpVersion;
+	private String _Location, _HttpVersion;
 	private Map<String, String> _Headers;
+	private Map<String, String> _Values;
 
 	public HttpRequest(String rawMessage) {
 		_RawMessage = rawMessage;
 		_Headers = new HashMap<String, String>();
+		_Values = new HashMap<String, String>();
 		parse();
 	}
 
@@ -28,18 +31,51 @@ public class HttpRequest {
 				_ReqeustType = RequestType.valueOf(tokenizer.nextToken());
 			} catch (Exception e) {
 				_ReqeustType = RequestType.BAD_REQUEST;
+				return;
 
 			}
 			_Location = tokenizer.nextToken();
 			_HttpVersion = tokenizer.nextToken();
 
-			while (tokenizer.hasMoreTokens()) {
-				String headerName = tokenizer.nextToken();
-				headerName = headerName.replace(':', ' ');
-				headerName = headerName.trim();
-				if (tokenizer.hasMoreTokens()) {
-					String headerValue = tokenizer.nextToken();
-					_Headers.put(headerName, headerValue);
+			String[] lines = _RawMessage.substring(_RawMessage.indexOf('\n'))
+					.trim().split("\n");
+			String[] values = null;
+
+			for (String line : lines) {
+				// Check if line is a header
+				if (line.contains(":") & values == null) {
+					line = line.trim();
+					String[] header = line.split(":");
+					if (header.length == 2) {
+						_Headers.put(header[0].trim(), header[1].trim());
+					} else {
+						_ReqeustType = RequestType.BAD_REQUEST;
+						return;
+					}
+				} else {
+					if (_ReqeustType == RequestType.POST & values == null) {
+						values = line.split("&");
+						for (String value : values) {
+							String[] valueSplit = value.split("=");
+							if (valueSplit.length == 2) {
+								try {
+									_Values.put(
+											valueSplit[0].trim(),
+											URLDecoder.decode(valueSplit[1],
+													"UTF-8").trim());
+								} catch (UnsupportedEncodingException e) {
+									_ReqeustType = RequestType.BAD_REQUEST;
+									return;
+								}
+							} else {
+								_ReqeustType = RequestType.BAD_REQUEST;
+								return;
+							}
+						}
+					} else {
+						_ReqeustType = RequestType.BAD_REQUEST;
+						return;
+					}
 				}
 			}
 		}
@@ -65,7 +101,6 @@ public class HttpRequest {
 		return new MessageImpl(toString());
 	}
 
-	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(_ReqeustType).append(" ").append(_Location).append(" ")
@@ -74,6 +109,11 @@ public class HttpRequest {
 		for (Entry<String, String> header : _Headers.entrySet()) {
 			builder.append(header.getKey() + ": " + header.getValue() + "\n");
 		}
+
+		for (Entry<String, String> value : _Values.entrySet()) {
+			builder.append(value.getKey() + "=" + value.getValue() + "&");
+		}
+
 		return builder.toString();
 	}
 }

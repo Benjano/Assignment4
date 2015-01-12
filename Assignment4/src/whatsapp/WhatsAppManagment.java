@@ -12,6 +12,8 @@ import protocol_http.HttpResponse;
 
 public class WhatsAppManagment {
 
+	public static final String HEADER_COOKIE = "Cookie";
+
 	// ********** Static Members **********
 	// Is the main WhatsAppManagment created
 	private static boolean _IsCreated = false;
@@ -95,18 +97,30 @@ public class WhatsAppManagment {
 			synchronized (user) {
 				_CurrentLoggedUsers.put(auth, user);
 			}
-			response.addValue("Set-Cookie", "user_auth" + "&" + auth);
+			response.addHeader("Set-Cookie", "user_auth" + "&" + auth);
+			response.setMessage("Welcome " + user.getName() + "@"
+					+ user.getPhone());
 		} else {
 			response.addHeader("ERROR 765", ErrorMessage.ERROR_765);
 		}
 		return result;
 	}
 
+	/**
+	 * Remove user from logged users and update response
+	 * 
+	 * @param request
+	 * @param response
+	 * @return true if user remove else false
+	 */
 	public boolean handleLogOut(HttpRequest request, HttpResponse response) {
-		// TODO
-		response.addHeader("Goodbye", "logged out");
-
-		return true;
+		String cookie = request.getHeader(HEADER_COOKIE);
+		if (validateHeader(cookie) && validateCookie(cookie)) {
+			response.setMessage("Goodbye");
+			_CurrentLoggedUsers.remove(cookie);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean handleList(HttpRequest request, HttpResponse response) {

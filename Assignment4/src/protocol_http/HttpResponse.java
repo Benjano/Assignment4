@@ -13,12 +13,12 @@ public class HttpResponse {
 	private String _HttpVersion;
 	private int _ResultCode;
 	private Map<String, String> _Headers;
-	private Map<String, String> _ResponseMessage;
+	private String _ResponseMessage;
 
 	public HttpResponse() {
 		_HttpVersion = "HTTP/1.1";
 		_Headers = new LinkedHashMap<String, String>();
-		_ResponseMessage = new LinkedHashMap<String, String>();
+		_ResponseMessage = "";
 		_ResultCode = HttpResultCode.RESULT_I_AM_A_TEAPOT;
 	}
 
@@ -30,12 +30,8 @@ public class HttpResponse {
 		_Headers.put(name, value);
 	}
 
-	public void addValue(String name, String value) {
-		try {
-			_ResponseMessage.put(name, URLEncoder.encode(value, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+	public void setMessage(String msg) {
+		_ResponseMessage = msg;
 	}
 
 	public Message<String> getMessage() {
@@ -50,9 +46,7 @@ public class HttpResponse {
 		for (Entry<String, String> header : _Headers.entrySet()) {
 			builder.append(header.getKey() + ": " + header.getValue() + "\n");
 		}
-		for (Entry<String, String> header : _ResponseMessage.entrySet()) {
-			builder.append(header.getKey() + " = " + header.getValue() + "\n");
-		}
+		builder.append(_ResponseMessage).append("\n$");
 		return builder.toString();
 	}
 
