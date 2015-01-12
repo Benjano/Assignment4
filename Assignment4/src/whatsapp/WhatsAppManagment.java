@@ -115,7 +115,7 @@ public class WhatsAppManagment {
 	 */
 	public boolean handleLogOut(HttpRequest request, HttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
-		if (validateHeader(cookie) && validateCookie(cookie)) {
+		if (validateCookie(cookie)) {
 			response.setMessage("Goodbye");
 			_CurrentLoggedUsers.remove(cookie);
 			return true;
@@ -124,13 +124,39 @@ public class WhatsAppManagment {
 	}
 
 	public boolean handleList(HttpRequest request, HttpResponse response) {
-		headerChecker = request.getHeader("List");
-		isOk = validateHeader(headerChecker)
-				&& (headerChecker.equals("Users")
-						| headerChecker.equals("Group") | headerChecker
-							.equals("Groups"));
-		if (!isOk) {
-			response.addHeader("ERROR 273", ErrorMessage.ERROR_273);
+		if (validateCookie(request.getHeader(HEADER_COOKIE))) {
+			String value = request.getValue("List");
+			if (value != null) {
+				if (value.equals("Users")) {
+					String users = "";
+					for (Map.Entry<String, User> it : _Users.entrySet()) {
+						users += it.getValue() + "\n";
+					}
+					// Remove the last \n
+					users.substring(0, users.length() - 1);
+					response.setMessage(users);
+				} else if (value.equals("Group")) {
+					value = request.getValue("Group");
+					if (value != null && _Group.containsKey(value)) {
+						response.setMessage(_Group.get(value).toString());
+					} else {
+						response.setMessage("ERROR 273: "
+								+ ErrorMessage.ERROR_273);
+						return false;
+					}
+				} else if (value.equals("Groups")) {
+					String groups = "";
+					for (Map.Entry<String, Group> it : _Group.entrySet()) {
+						groups += it.getKey() + ": " + it.getValue() + "\n";
+					}
+					// Remove the last \n
+					groups.substring(0, groups.length() - 1);
+					response.setMessage(groups);
+				} else {
+					response.setMessage("ERROR 273: " + ErrorMessage.ERROR_273);
+					return false;
+				}
+			}
 		}
 		return true;
 	}
@@ -286,7 +312,9 @@ public class WhatsAppManagment {
 	}
 
 	public boolean validateCookie(String cookie) {
-		// TODO Auto-generated method stub
+		if (validateHeader(cookie)) {
+			return _CurrentLoggedUsers.containsKey(cookie);
+		}
 		return false;
 	}
 

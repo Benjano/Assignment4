@@ -1,6 +1,5 @@
 package whatsapp;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -35,7 +34,7 @@ public class Group {
 	 * @return boolean true if user added else false
 	 */
 	public boolean addUser(User user) {
-		if(_UsersInGroup.containsKey(user.getPhone())){
+		if (_UsersInGroup.containsKey(user.getPhone())) {
 			return false;
 		}
 		_UsersInGroup.put(user.getPhone(), user);
@@ -49,7 +48,8 @@ public class Group {
 	 * @return boolean true if user removed else false
 	 */
 	public boolean removeUser(User user) {
-		if(_UsersInGroup.containsKey(user.getPhone()) && !_GroupManager.equals(user) ){
+		if (_UsersInGroup.containsKey(user.getPhone())
+				&& !_GroupManager.equals(user)) {
 			_UsersInGroup.remove(user.getPhone());
 			return true;
 		}
@@ -101,11 +101,11 @@ public class Group {
 	public boolean isUserExistsInGroup(User user) {
 		return _UsersInGroup.get(user.getPhone()) != null;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(_GroupName).append(": ").append(_GroupManager.getPhone());
+		builder.append(_GroupManager.getPhone());
 		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
 			if (!it.getValue().equals(_GroupManager))
 				builder.append(",").append(it.getKey());

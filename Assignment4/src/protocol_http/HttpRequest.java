@@ -3,6 +3,7 @@ package protocol_http;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
@@ -19,8 +20,8 @@ public class HttpRequest {
 
 	public HttpRequest(String rawMessage) {
 		_RawMessage = rawMessage;
-		_Headers = new HashMap<String, String>();
-		_Values = new HashMap<String, String>();
+		_Headers = new LinkedHashMap<String, String>();
+		_Values = new LinkedHashMap<String, String>();
 		parse();
 	}
 
@@ -85,6 +86,10 @@ public class HttpRequest {
 		return _Headers.get(key);
 	}
 
+	public String getValue(String key) {
+		return _Values.get(key);
+	}
+
 	public RequestType getReqeustType() {
 		return _ReqeustType;
 	}
@@ -104,7 +109,7 @@ public class HttpRequest {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(_ReqeustType).append(" ").append(_Location).append(" ")
-				.append(_HttpVersion).append("\n");
+				.append(_HttpVersion).append("\n\n");
 
 		for (Entry<String, String> header : _Headers.entrySet()) {
 			builder.append(header.getKey() + ": " + header.getValue() + "\n");
@@ -113,7 +118,9 @@ public class HttpRequest {
 		for (Entry<String, String> value : _Values.entrySet()) {
 			builder.append(value.getKey() + "=" + value.getValue() + "&");
 		}
-
-		return builder.toString();
+		String result = builder.toString();
+		result = result.substring(0, result.length() - 1);
+		result += "\n$";
+		return result;
 	}
 }

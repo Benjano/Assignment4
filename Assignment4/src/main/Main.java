@@ -10,7 +10,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		
+		HttpRequest httpRequest = new HttpRequest("POST /list.jsp HTTP/1.1 \n\n List=Group&Group=NirAndAviv");
 
+		System.out.println(httpRequest);
 		User nir = new User("nir", "0545750068");
 		User aviv = new User("aviv", "0546310736");
 		User hen = new User("hen", "0547539991");
@@ -30,8 +32,10 @@ public class Main {
 		System.out.println(group.addUser(aviv));
 		System.out.println(group.toString());
 
-		
-		
+		String test = "HELLO MY NAME IS ALMO\n";
+//		String test2 = test.substring(0, test.length()-1);
+		System.out.println(test);
+		System.out.println("T");
 
 //		whatsapp.Message message = new whatsapp.Message(nir, aviv,"May I tell you something?");
 
