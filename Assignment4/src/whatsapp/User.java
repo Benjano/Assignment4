@@ -108,4 +108,13 @@ public class User {
 		return _Phone;
 	}
 
+	public String getMessages(String target) {
+		StringBuilder builder = new StringBuilder();
+		if (_Messages.containsKey(target)) {
+			for (Message message : _Messages.get(target)) {
+				builder.append(message);
+			}
+		}
+		return builder.toString();
+	}
 }
