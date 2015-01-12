@@ -12,16 +12,30 @@ import protocol.HttpResponse;
 
 public class WhatsAppManagment {
 
+	// ********** Static Members **********
+	// Is the main WhatsAppManagment created
 	private static boolean _IsCreated = false;
+
+	// The main WhatsAppManagment instance
 	private static WhatsAppManagment _WhatsAppManagment;
+
+	// The sum of active instances
 	private static AtomicInteger _SumOfInstances;
 
+	// <Cookie, user> used to monitor current logged users
+	private static Map<String, User> _CurrentLoggedUsers;
+
+	// ********** Members **********
+	// The users of WhatsApp <phone, user>
 	private Map<String, User> _Users;
+
+	// The users of WhatsApp <name, group>
 	private Map<String, Group> _Group;
 
 	private WhatsAppManagment() {
 		_Users = new ConcurrentHashMap<String, User>();
 		_Group = new ConcurrentHashMap<String, Group>();
+		_CurrentLoggedUsers = new ConcurrentHashMap<String, User>();
 		_SumOfInstances = new AtomicInteger(0);
 	}
 
@@ -79,9 +93,9 @@ public class WhatsAppManagment {
 			User user = getUserCreateIfNotExists(name, phone);
 			String auth = generateCookieCode(name, phone);
 			synchronized (user) {
-				user.setAuth(auth);
+				_CurrentLoggedUsers.put(auth, user);
 			}
-			response.addHeader("Set-Cookies", name + "@" + phone);
+			response.addValue("Set-Cookie", "user_auth" + "&" + auth);
 		} else {
 			response.addHeader("ERROR 765", ErrorMessage.ERROR_765);
 		}
