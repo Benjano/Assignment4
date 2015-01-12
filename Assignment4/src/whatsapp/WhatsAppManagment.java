@@ -21,4 +21,9 @@ public class WhatsAppManagment {
 		// TODO Auto-generated method stub
 		return true;
 	}
+
+	public boolean validateGroupManager(String headerChecker) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

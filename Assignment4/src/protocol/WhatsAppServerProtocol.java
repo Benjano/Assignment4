@@ -35,14 +35,22 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 		HttpResponse response = new HttpResponse();
 		response.setResultCode(HttpResultCode.RESULT_OK);
 
-		if (!validateRequest(request))
+		if (!validateRequest(request)) {
 			response.setResultCode(HttpResultCode.RESULT_BAD_REQUEST);
+			return response.getMessage();
+		}
 
 		WhatsAppRequestType requestType = checkRequestType(request);
-		if (requestType == WhatsAppRequestType.BAD_REQUEST)
+		if (requestType == WhatsAppRequestType.BAD_REQUEST) {
 			response.setResultCode(HttpResultCode.RESULT_NOT_FOUND);
+			return response.getMessage();
+		}
 
-		validateRequestType(requestType, request, response);
+		if (!validateRequestType(requestType, request, response)) {
+			return response.getMessage();
+		}
+
+		proccessRequest(requestType, request, response);
 
 		return response.getMessage();
 	}
@@ -102,6 +110,163 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 			if (!isOk) {
 				response.addHeader("ERROR 765", ErrorMessage.ERROR_765);
 			}
+			break;
+
+		case LOGOUT:
+			// TODO
+			response.addHeader("Goodbye", "logged out");
+			break;
+
+		case LIST:
+			headerChecker = request.getHeader("List");
+			isOk = validateHeader(headerChecker)
+					&& (headerChecker.equals("Users")
+							| headerChecker.equals("Group") | headerChecker
+								.equals("Groups"));
+			if (!isOk) {
+				response.addHeader("ERROR 273", ErrorMessage.ERROR_273);
+			}
+			break;
+
+		case CREATE_GROUP:
+			headerChecker = request.getHeader("GroupName");
+			isOk = validateHeader(headerChecker);
+			if (isOk) {
+				if (!_managment.validateGroup(headerChecker)) {
+					try {
+						String decodedUsers = URLDecoder.decode(headerChecker,
+								UTF_8);
+						String[] usersName = decodedUsers.split(",");
+						for (String userName : usersName) {
+							if (!(isOk = _managment.validateUser(userName))) {
+								response.addHeader("ERROR 929",
+										ErrorMessage.ERROR_929 + " " + userName);
+								break;
+							}
+						}
+					} catch (UnsupportedEncodingException e) {
+						isOk = false;
+						response.addHeader("ERROR 675", ErrorMessage.ERROR_675);
+					}
+				} else {
+					response.addHeader("ERROR 511", ErrorMessage.ERROR_511);
+				}
+			} else {
+				response.addHeader("ERROR 675", ErrorMessage.ERROR_675);
+			}
+			break;
+
+		case SEND:
+			headerChecker = request.getHeader("Type");
+			isOk = validateHeader(headerChecker);
+			if (isOk) {
+				if (headerChecker.equals("Group")) {
+					headerChecker = request.getHeader("Target");
+					isOk = validateHeader(headerChecker);
+					if (isOk) {
+						isOk = _managment.validateGroup(headerChecker);
+						if (!isOk) {
+							response.addHeader("ERROR 771",
+									ErrorMessage.ERROR_771);
+						}
+					} else {
+						response.addHeader("ERROR 711", ErrorMessage.ERROR_711);
+					}
+				} else if (headerChecker.equals("Direct")) {
+					headerChecker = request.getHeader("Target");
+					isOk = validateHeader(headerChecker);
+					if (isOk) {
+						isOk = _managment.validatePhoneNumber(headerChecker);
+						if (!isOk) {
+							response.addHeader("ERROR 771",
+									ErrorMessage.ERROR_771);
+						}
+					} else {
+						response.addHeader("ERROR 711", ErrorMessage.ERROR_711);
+					}
+				} else {
+					isOk = false;
+					response.addHeader("ERROR 836", ErrorMessage.ERROR_836);
+				}
+			}
+			break;
+
+		case ADD_USER:
+			headerChecker = request.getHeader("Target");
+			if (isOk = validateHeader(headerChecker)
+					&& (isOk = _managment.validateGroup(headerChecker))) {
+				headerChecker = request.getHeader("User");
+				if (isOk = validateHeader(headerChecker)) {
+					if (isOk = _managment.validatePhoneNumber(headerChecker)) {
+						if (isOk = _managment
+								.validateGroupManager(headerChecker)) {
+							if (!(isOk = !_managment
+									.validateUserInGroup(headerChecker))) {
+								// User is already in group
+								response.addHeader("ERROR 142",
+										ErrorMessage.ERROR_142);
+							}
+						} else {
+							// User is not the group manager
+							response.addHeader("ERROR 669",
+									ErrorMessage.ERROR_669);
+						}
+					} else {
+						// User does not exists
+						response.addHeader("ERROR 242", ErrorMessage.ERROR_242);
+					}
+				} else {
+					// Missing parameters
+					response.addHeader("ERROR 242", ErrorMessage.ERROR_242);
+				}
+			} else {
+				// Group does not exists
+				response.addHeader("ERROR 770", ErrorMessage.ERROR_770);
+			}
+
+			break;
+
+		case REMOVE_USER:
+			headerChecker = request.getHeader("Target");
+			isOk = validateHeader(headerChecker);
+			if (isOk) {
+				isOk = _managment.validateGroup(headerChecker);
+				headerChecker = request.getHeader("User");
+				isOk = validateHeader(headerChecker);
+				if (isOk) {
+					isOk = _managment.validatePhoneNumber(headerChecker);
+					if (isOk) {
+						isOk = _managment.validateUserInGroup(headerChecker);
+					}
+				}
+			}
+			break;
+
+		case QUEUE:
+			break;
+
+		default:
+			response.setResultCode(HttpResultCode.RESULT_NOT_FOUND);
+			isOk = false;
+			break;
+		}
+
+		return isOk;
+	}
+
+	private boolean proccessRequest(WhatsAppRequestType requestType,
+			HttpRequest request, HttpResponse response) {
+
+		String headerChecker;
+		boolean isOk = true;
+
+		switch (requestType) {
+		case LOGIN:
+			isOk = validateHeader(request.getHeader("UserName"))
+					& validateHeader(request.getHeader("Phone"));
+			if (!isOk) {
+				response.addHeader("ERROR 765", ErrorMessage.ERROR_765);
+			}
 
 			break;
 
@@ -132,7 +297,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 						for (String userName : usersName) {
 							if (!(isOk = _managment.validateUser(userName))) {
 								response.addHeader("ERROR 929",
-										ErrorMessage.ERROR_929+ " "+ userName);
+										ErrorMessage.ERROR_929 + " " + userName);
 								break;
 							}
 						}
