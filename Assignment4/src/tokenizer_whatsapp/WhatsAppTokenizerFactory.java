@@ -1,4 +1,4 @@
-package threadPerClient;
+package tokenizer_whatsapp;
 
 import tokenizer.Tokenizer;
 import tokenizer.TokenizerFactory;

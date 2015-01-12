@@ -1,4 +1,4 @@
-package protocol;
+package protocol_http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import constants.HttpResultCode;
-import tokenizer.Message;
-import tokenizer.MessageImpl;
 
 public class HttpResponse {
 

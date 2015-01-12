@@ -4,9 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import constants.HttpResultCode;
-import protocol.HttpRequest;
-import protocol.HttpResponse;
-import tokenizer.Message;
+import protocol_http.HttpRequest;
+import protocol_http.HttpResponse;
+import protocol_http.Message;
 import whatsapp.User;
 
 public class Main {
@@ -46,6 +46,14 @@ public class Main {
 		whatsapp.Message message2 = new whatsapp.Message(aviv, nir, "No.");
 		System.out.println(message);
 		System.out.println(message2);
+		
+		
+//		import protocol.ServerProtocolFactory;
+//		import protocol_http.HttpProtocolFactory;
+//		import protocol_whatsapp.WhatsAppProtocolFactory;
+//		import tokenizer.TokenizerFactory;
+//		import tokenizer_http.HttpTokenizerFactory;
+//		import tokenizer_whatsaap.WhatsAppTokenizerFactory;
 	}
 
 }

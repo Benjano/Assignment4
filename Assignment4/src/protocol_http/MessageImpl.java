@@ -1,4 +1,5 @@
-package tokenizer;
+package protocol_http;
+
 
 public class MessageImpl implements Message<String> {
 

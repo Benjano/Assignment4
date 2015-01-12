@@ -1,12 +1,10 @@
-package protocol;
+package protocol_http;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
-import tokenizer.Message;
-import tokenizer.MessageImpl;
 import constants.RequestType;
 
 public class HttpRequest {

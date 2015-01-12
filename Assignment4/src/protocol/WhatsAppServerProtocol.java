@@ -1,6 +1,8 @@
 package protocol;
 
-import tokenizer.Message;
+import protocol_http.HttpRequest;
+import protocol_http.HttpResponse;
+import protocol_http.Message;
 import whatsapp.WhatsAppManagment;
 import constants.HttpResultCode;
 import constants.RequestType;

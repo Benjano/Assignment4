@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import constants.ErrorMessage;
-import protocol.HttpRequest;
-import protocol.HttpResponse;
+import protocol_http.HttpRequest;
+import protocol_http.HttpResponse;
 
 public class WhatsAppManagment {
 
