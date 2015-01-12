@@ -2,6 +2,7 @@ package constants;
 
 public class HttpResultCode {
 	public static final int RESULT_OK = 200;
+	public static final int RESULT_BAD_REQUEST = 400;
 	public static final int RESULT_FORBIDDEN = 403;
 	public static final int RESULT_NOT_FOUND = 404;
 	public static final int RESULT_METHOD_NOT_ALLOWED = 405;

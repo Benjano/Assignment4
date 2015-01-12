@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Vector;
 
-public class TokenizerImpl<T> implements Tokenizer<Message<T>> {
+public class TokenizerImpl<T> implements Tokenizer<Message<String>> {
 
 	private Vector<InputStreamReader> _Readers;
 	private char _Delimeter;
@@ -16,28 +16,32 @@ public class TokenizerImpl<T> implements Tokenizer<Message<T>> {
 	}
 
 	@Override
-	public Message<T> nextMessage() {
+	public Message<String> nextMessage() throws ArrayIndexOutOfBoundsException {
 		int c;
-		MessageImpl<T> resultMessage = new MessageImpl<T>();
-		InputStreamReader reader = _Readers.get(0);
-		try {
-			while ((c = reader.read()) != -1) {
-				if (c == _Delimeter) {
-					break;
-				} else
-					resultMessage.addChar((char) c);
-			}
-			if (c == -1) {
-				_Readers.remove(0);
-				if (_Readers.isEmpty()) {
-					_isClosed = true;
+		StringBuilder builder = new StringBuilder();
+		if (!_Readers.isEmpty()) {
+			InputStreamReader reader = _Readers.get(0);
+			try {
+				while ((c = reader.read()) != -1) {
+					if (c == _Delimeter) {
+						break;
+					} else
+						builder.append((char) c);
 				}
+				if (c == -1) {
+					_Readers.remove(0);
+					if (_Readers.isEmpty()) {
+						_isClosed = true;
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
-		return resultMessage;
+			return new MessageImpl(builder.toString());
+		} else {
+			throw new ArrayIndexOutOfBoundsException("No new messages to read");
+		}
 	}
 
 	@Override

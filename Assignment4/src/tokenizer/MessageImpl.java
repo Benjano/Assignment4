@@ -1,21 +1,16 @@
 package tokenizer;
 
-public class MessageImpl<T> implements Message<T> {
+public class MessageImpl implements Message<String> {
 
-	private String _messageRaw;
-	
-	public MessageImpl(){
-		_messageRaw = "";
-	}
-	
-	@Override
-	public void addChar(char c) {
-		_messageRaw+=c;
+	private String _Message;
+
+	public MessageImpl(String msg) {
+		_Message = msg;
 	}
 
 	@Override
-	public String getRawString() {
-		return _messageRaw;
+	public String getMessage() {
+		return _Message;
 	}
 
 }

@@ -3,7 +3,10 @@ package protocol;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
+import tokenizer.Message;
+import tokenizer.MessageImpl;
 import constants.RequestType;
 
 public class HttpRequest {
@@ -22,18 +25,27 @@ public class HttpRequest {
 
 	private void parse() {
 		StringTokenizer tokenizer = new StringTokenizer(_RawMessage);
-		_ReqeustType = RequestType.valueOf(tokenizer.nextToken());
+		try {
+			_ReqeustType = RequestType.valueOf(tokenizer.nextToken());
+		} catch (Exception e) {
+			_ReqeustType = RequestType.BAD_REQUEST;
+
+		}
 		_Location = tokenizer.nextToken();
 		_HttpVersion = tokenizer.nextToken();
 
-		String[] lines = _RawMessage.split("\r\n");
-		for (int i = 1; i < lines.length; i++) {
-			String[] keyVal = lines[i].split(":", 2);
-			_Headers.put(keyVal[0], keyVal[1]);
+		while (tokenizer.hasMoreTokens()) {
+			String headerName = tokenizer.nextToken();
+			headerName = headerName.replace(':', ' ');
+			headerName = headerName.trim();
+			if (tokenizer.hasMoreTokens()) {
+				String headerValue = tokenizer.nextToken();
+				_Headers.put(headerName, headerValue);
+			}
 		}
 	}
-	
-	public String getHeader(String key){
+
+	public String getHeader(String key) {
 		return _Headers.get(key);
 	}
 
@@ -44,14 +56,24 @@ public class HttpRequest {
 	public String getLocation() {
 		return _Location;
 	}
-	
+
 	public String getHttpVersion() {
 		return _HttpVersion;
 	}
 
-	@Override
-	public String toString() {
-		return "[" + _RawMessage + "]";
+	public Message<String> getMessage() {
+		return new MessageImpl(toString());
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(_ReqeustType).append(" ").append(_Location).append(" ")
+				.append(_HttpVersion).append("\n");
+
+		for (Entry<String, String> header : _Headers.entrySet()) {
+			builder.append(header.getKey() + ": " + header.getValue() + "\n");
+		}
+		return builder.toString();
+	}
 }

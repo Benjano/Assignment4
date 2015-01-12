@@ -1,6 +1,6 @@
 package constants;
 
 public enum RequestType {
-	GET, POST;
+	BAD_REQUEST, GET, POST;
 
 }

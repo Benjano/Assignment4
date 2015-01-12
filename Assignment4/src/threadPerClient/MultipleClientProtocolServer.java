@@ -12,64 +12,59 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 	private ServerProtocolFactory<T> _protocolFactory;
 	private TokenizerFactory<T> _tokenizerFactory;
 
-
-	public MultipleClientProtocolServer(int port, ServerProtocolFactory<T> protocolFactory, TokenizerFactory<T> tokenizerFactory)
-	{
+	public MultipleClientProtocolServer(int port,
+			ServerProtocolFactory<T> protocolFactory,
+			TokenizerFactory<T> tokenizerFactory) {
 		serverSocket = null;
 		listenPort = port;
 		_protocolFactory = protocolFactory;
 		_tokenizerFactory = tokenizerFactory;
 	}
 
-	public void run()
-	{
+	public void run() {
 		try {
 			serverSocket = new ServerSocket(listenPort);
 			System.out.println("Listening...");
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			System.out.println("Cannot listen on port " + listenPort);
 		}
 
-		while (true)
-		{
+		while (true) {
 			try {
-				ConnectionHandler newConnection = new ConnectionHandler(serverSocket.accept(), _protocolFactory.create(),_tokenizerFactory.create());
+				ConnectionHandler newConnection = new ConnectionHandler(
+						serverSocket.accept(), _protocolFactory.create(),
+						_tokenizerFactory.create());
 				new Thread(newConnection).start();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				System.out.println("Failed to accept on port " + listenPort);
 			}
 		}
 	}
 
+	
 
 	// Closes the connection
-	public void close() throws IOException
-	{
+	public void close() throws IOException {
 		serverSocket.close();
 	}
 
-	public static void main(String[] args) throws IOException
-	{
+	public static void main(String[] args) throws IOException {
 		// Get port
 		int port = Integer.decode(args[0]).intValue();
 
-		//MultipleClientProtocolServer server = new MultipleClientProtocolServer(port, new HttpProtocolFactory(), new HttpTokenizerFactory());
-		MultipleClientProtocolServer server = new MultipleClientProtocolServer(port, new WhatsAppProtocolFactory(), new WhatsAppTokenizerFactory());
+		// MultipleClientProtocolServer server = new
+		// MultipleClientProtocolServer(port, new HttpProtocolFactory(), new
+		// HttpTokenizerFactory());
+		MultipleClientProtocolServer server = new MultipleClientProtocolServer(
+				port, new WhatsAppProtocolFactory(),
+				new WhatsAppTokenizerFactory());
 		Thread serverThread = new Thread(server);
 		serverThread.start();
 		try {
 			serverThread.join();
-		}
-		catch (InterruptedException e)
-		{
+		} catch (InterruptedException e) {
 			System.out.println("Server stopped");
 		}
 
-
-
 	}
 }
-
