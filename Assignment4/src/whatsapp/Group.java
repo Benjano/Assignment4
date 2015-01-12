@@ -1,5 +1,6 @@
 package whatsapp;
 
+
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -23,6 +24,7 @@ public class Group {
 		_GroupName = name;
 		_GroupManager = manager;
 		_UsersInGroup = new ConcurrentHashMap<String, User>();
+		addUser(manager);
 		_GroupMessages = new Vector<Message>();
 	}
 
@@ -33,8 +35,11 @@ public class Group {
 	 * @return boolean true if user added else false
 	 */
 	public boolean addUser(User user) {
-		// TODO Add user if not exists
-		return false;
+		if(_UsersInGroup.containsKey(user.getPhone())){
+			return false;
+		}
+		_UsersInGroup.put(user.getPhone(), user);
+		return true;
 	}
 
 	/**
@@ -44,9 +49,11 @@ public class Group {
 	 * @return boolean true if user removed else false
 	 */
 	public boolean removeUser(User user) {
-		// TODO Remove user if exists
-		// TODO Cannot remove manager
-		return true;
+		if(_UsersInGroup.containsKey(user.getPhone()) && !_GroupManager.equals(user) ){
+			_UsersInGroup.remove(user.getPhone());
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -93,5 +100,16 @@ public class Group {
 	 */
 	public boolean isUserExistsInGroup(User user) {
 		return _UsersInGroup.get(user.getPhone()) != null;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(_GroupName).append(": ").append(_GroupManager.getPhone());
+		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
+			if (!it.getValue().equals(_GroupManager))
+				builder.append(",").append(it.getKey());
+		}
+		return builder.toString();
 	}
 }
