@@ -76,9 +76,7 @@ public class WhatsAppManagment {
 		return null;
 	}
 
-	private User getUser(String phone) {
-		return _Users.get(phone);
-	}
+
 
 	private boolean validateHeader(String header) {
 		return header != null && !header.equals("");
