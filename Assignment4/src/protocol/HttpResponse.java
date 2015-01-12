@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import constants.HttpResultCode;
 import tokenizer.Message;
 import tokenizer.MessageImpl;
 
@@ -16,10 +17,14 @@ public class HttpResponse {
 	private Map<String, String> _Headers;
 	private Map<String, String> _ResponseMessage;
 
-	public HttpResponse(int resultCode) {
+	public HttpResponse() {
 		_HttpVersion = "HTTP/1.1";
 		_Headers = new LinkedHashMap<String, String>();
 		_ResponseMessage = new LinkedHashMap<String, String>();
+		_ResultCode = HttpResultCode.RESULT_I_AM_A_TEAPOT;
+	}
+
+	public void setResultCode(int resultCode) {
 		_ResultCode = resultCode;
 	}
 

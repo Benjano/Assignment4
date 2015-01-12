@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import tokenizer.Message;
 import tokenizer.MessageImpl;
 import whatsapp.WhatsAppManagment;
+import constants.ErrorMessage;
 import constants.HttpResultCode;
 import constants.RequestType;
 import constants.WhatsAppRequestType;
@@ -21,20 +22,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	public static final String ADD_USER = "/add_user.jsp";
 	public static final String REMOVE_USER = "/remove_user.jsp";
 	public static final String QUEUE = "/queue.jsp";
-	
 
-	public static final String ERROR_273 = "Missing paramaters";
-	public static final String ERROR_765 = "Cannot login, missing paramaters";
-	public static final String ERROR_675 = "Cannot create group, missing paramaters";
-	public static final String ERROR_929 = "Unknown User";
-	public static final String ERROR_511 = "Group Name Already Taken";
-	public static final String ERROR_771 = "Target Does not Exists";
-	public static final String ERROR_836 = "Invalid Type";
-	public static final String ERROR_711 = "Cannot send, missing paramaters";
-	public static final String ERROR_669 = "Premission denied";
-
-	
-	
 	private WhatsAppManagment _managment;
 
 	public WhatsAppServerProtocol(WhatsAppManagment managment) {
@@ -44,22 +32,19 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	@Override
 	public Message<String> processMessage(Message<String> msg) {
 		HttpRequest request = new HttpRequest(msg.getMessage());
+		HttpResponse response = new HttpResponse();
+		response.setResultCode(HttpResultCode.RESULT_OK);
+
 		if (!validateRequest(request))
-			return createHttpResponse(HttpResultCode.RESULT_BAD_REQUEST)
-					.getMessage();
+			response.setResultCode(HttpResultCode.RESULT_BAD_REQUEST);
 
 		WhatsAppRequestType requestType = checkRequestType(request);
 		if (requestType == WhatsAppRequestType.BAD_REQUEST)
-			return createHttpResponse(HttpResultCode.RESULT_NOT_FOUND)
-					.getMessage();
-		
-		if (!validateRequestType(requestType, request)){
-			 HttpResponse response = createHttpResponse(HttpResultCode.RESULT_OK);
-			 response.add
-		}
-					
+			response.setResultCode(HttpResultCode.RESULT_NOT_FOUND);
 
-		return null;
+		validateRequestType(requestType, request, response);
+
+		return response.getMessage();
 	}
 
 	@Override
@@ -105,7 +90,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	}
 
 	private boolean validateRequestType(WhatsAppRequestType requestType,
-			HttpRequest request) {
+			HttpRequest request, HttpResponse response) {
 
 		String headerChecker;
 		boolean isOk = true;
@@ -114,6 +99,10 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 		case LOGIN:
 			isOk = validateHeader(request.getHeader("UserName"))
 					& validateHeader(request.getHeader("Phone"));
+			if (!isOk) {
+				response.addHeader("ERROR 765", ErrorMessage.ERROR_765);
+			}
+
 			break;
 
 		case LOGOUT:
@@ -125,26 +114,40 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 					&& (headerChecker.equals("Users")
 							| headerChecker.equals("Group") | headerChecker
 								.equals("Groups"));
+			if (!isOk) {
+				response.addHeader("ERROR 273", ErrorMessage.ERROR_273);
+			}
 			break;
 
 		case CREATE_GROUP:
-			headerChecker = request.getHeader("List");
-			isOk = validateHeader(headerChecker)
-					&& (headerChecker.equals("Users")
-							| headerChecker.equals("Group") | headerChecker
-								.equals("Groups"));
-			if (isOk)
-				try {
-					String decodedUsers = URLDecoder.decode(headerChecker,
-							UTF_8);
-					String[] usersName = decodedUsers.split(",");
-					for (String userName : usersName) {
-						if (!(isOk = _managment.validateUser(userName)))
-							break;
+			headerChecker = request.getHeader("GroupName");
+			isOk = validateHeader(headerChecker);
+
+			if (isOk) {
+				if (!_managment.validateUserInGroup(headerChecker)) {
+					try {
+						String decodedUsers = URLDecoder.decode(headerChecker,
+								UTF_8);
+						String[] usersName = decodedUsers.split(",");
+						for (String userName : usersName) {
+							if (!(isOk = _managment.validateUser(userName))) {
+								response.addHeader("ERROR 929",
+										ErrorMessage.ERROR_929+ " "+ userName);
+								break;
+							}
+						}
+
+					} catch (UnsupportedEncodingException e) {
+						isOk = false;
+						response.addHeader("ERROR 675", ErrorMessage.ERROR_675);
 					}
-				} catch (UnsupportedEncodingException e) {
-					isOk = false;
+				} else {
+					response.addHeader("ERROR 511", ErrorMessage.ERROR_511);
 				}
+			} else {
+				response.addHeader("ERROR 675", ErrorMessage.ERROR_675);
+			}
+
 			break;
 
 		case SEND:
@@ -201,6 +204,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 			break;
 
 		default:
+			response.setResultCode(HttpResultCode.RESULT_NOT_FOUND);
 			isOk = false;
 			break;
 		}
@@ -211,15 +215,6 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 
 	private boolean validateHeader(String header) {
 		return header != null && !header.equals("");
-	}
-
-	/**
-	 * HTTP RESPONSES
-	 */
-
-	private HttpResponse createHttpResponse(int resultCode) {
-		HttpResponse response = new HttpResponse(resultCode);
-		return response;
 	}
 
 }
