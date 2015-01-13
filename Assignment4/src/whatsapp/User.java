@@ -117,4 +117,10 @@ public class User {
 		}
 		return builder.toString();
 	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder().append(_Name).append("@").append(_Phone)
+				.toString();
+	}
 }
