@@ -76,10 +76,6 @@ public class WhatsAppManagment {
 		return null;
 	}
 
-	private boolean validateHeader(String header) {
-		return header != null && !header.equals("");
-	}
-
 	// ************** URI FUNCTIONS **************
 	public boolean handleLogin(HttpRequest request, HttpResponse response) {
 		String name = request.getValue("UserName");
@@ -209,9 +205,12 @@ public class WhatsAppManagment {
 					return false;
 				} else if (type.equals("Group")) {
 					if (_Groups.containsKey(target)) {
-						Message message = new Message(source, target, contect);
-						_Groups.get(target).addMessage(message);
-						return true;
+						if (validateUserInGroup(target, source)) {
+							Message message = new Message(source, target,
+									contect);
+							_Groups.get(target).addMessage(message);
+							return true;
+						}
 					}
 					response.setMessage("ERROR 771: " + ErrorMessage.ERROR_771);
 					return false;
@@ -289,27 +288,20 @@ public class WhatsAppManagment {
 	}
 
 	// ************** VALIDATE METHODS **************
-	public boolean validateUser(String userName) {
-		return true;
-	}
-
-	public boolean validateGroup(String headerChecker) {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	public boolean validatePhoneNumber(String headerChecker) {
-		// TODO Auto-generated method stub
-		return true;
-	}
 
 	public boolean validateUserInGroup(String groupName, String userPhone) {
-		// TODO Auto-generated method stub
-		return true;
+		if (_Groups.containsKey(groupName) && _Users.containsKey(userPhone)) {
+			return _Groups.get(groupName).isUserExistsInGroup(
+					_Users.get(userPhone));
+		}
+		return false;
 	}
 
-	public boolean validateGroupManager(String headerChecker) {
-		// TODO Auto-generated method stub
+	public boolean validateGroupManager(String groupName, String userPhone) {
+		if (_Groups.containsKey(groupName) && _Users.containsKey(userPhone)) {
+			return _Groups.get(groupName).getGroupManagerPhone()
+					.equals(userPhone);
+		}
 		return false;
 	}
 
@@ -318,6 +310,10 @@ public class WhatsAppManagment {
 			return _CurrentLoggedUsers.containsKey(cookie);
 		}
 		return false;
+	}
+
+	private boolean validateHeader(String header) {
+		return header != null && !header.equals("");
 	}
 
 }
