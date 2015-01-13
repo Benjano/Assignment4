@@ -1,5 +1,6 @@
 package whatsapp;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -111,5 +112,10 @@ public class Group {
 				builder.append(",").append(it.getKey());
 		}
 		return builder.toString();
+	}
+
+	public Collection<? extends Message> getNewMessages(String _Phone) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

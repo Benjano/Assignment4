@@ -7,7 +7,7 @@ import java.util.Vector;
 import protocol_http.Message;
 import protocol_http.MessageImpl;
 
-public class TokenizerImpl<T> implements Tokenizer<Message<String>> {
+public class TokenizerImpl implements Tokenizer<Message<String>> {
 
 	private Vector<InputStreamReader> _Readers;
 	private char _Delimeter;

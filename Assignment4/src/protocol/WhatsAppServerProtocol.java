@@ -50,25 +50,25 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 
 	// Process the request by it's URI
 	private void processRequest(HttpRequest request, HttpResponse response) {
-		if (request.getReqeustType().equals(LOGIN)) {
+		if (request.getLocation().equals(LOGIN)) {
 			_managment.handleLogin(request, response);
 			return;
 		} else {
 			String cookie = request.getHeader("Cookie");
 			if (_managment.validateCookie(cookie)) {
-				if (request.getReqeustType().equals(LOGOUT)) {
+				if (request.getLocation().equals(LOGOUT)) {
 					_managment.handleLogOut(request, response);
-				} else if (request.getReqeustType().equals(LIST)) {
+				} else if (request.getLocation().equals(LIST)) {
 					_managment.handleList(request, response);
-				} else if (request.getReqeustType().equals(CREATE_GROUP)) {
+				} else if (request.getLocation().equals(CREATE_GROUP)) {
 					_managment.handleCreateGroup(request, response);
-				} else if (request.getReqeustType().equals(SEND)) {
+				} else if (request.getLocation().equals(SEND)) {
 					_managment.handleSend(request, response);
-				} else if (request.getReqeustType().equals(ADD_USER)) {
+				} else if (request.getLocation().equals(ADD_USER)) {
 					_managment.handleAddUser(request, response);
-				} else if (request.getReqeustType().equals(REMOVE_USER)) {
+				} else if (request.getLocation().equals(REMOVE_USER)) {
 					_managment.handleRemoveUser(request, response);
-				} else if (request.getReqeustType().equals(QUEUE)) {
+				} else if (request.getLocation().equals(QUEUE)) {
 					_managment.handleQueue(request, response);
 				} else {
 					response.setResultCode(HttpResultCode.RESULT_NOT_FOUND);

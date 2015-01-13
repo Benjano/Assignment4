@@ -13,7 +13,8 @@ public class User {
 	private Map<String, Group> _UserGroups;
 
 	// <Target, List of messages> The messages of the user
-	private Map<String, List<Message>> _Messages;
+	private Map<String, List<Message>> _MessagesRead;
+	private Map<String, List<Message>> _MessagesRecieved;
 
 	/**
 	 * Constuctor
@@ -25,7 +26,8 @@ public class User {
 		_Name = name;
 		_Phone = phone;
 		_UserGroups = new ConcurrentHashMap<String, Group>();
-		_Messages = new ConcurrentHashMap<String, List<Message>>();
+		_MessagesRead = new ConcurrentHashMap<String, List<Message>>();
+		_MessagesRecieved = new ConcurrentHashMap<String, List<Message>>();
 	}
 
 	/**
@@ -35,7 +37,6 @@ public class User {
 	 * @return true if group added else false
 	 */
 	public boolean addGroup(Group group) {
-
 		if (_UserGroups.containsKey(group)) {
 			return false;
 		}
@@ -51,6 +52,10 @@ public class User {
 	 */
 	public boolean removeGroup(String name) {
 		if (_UserGroups.containsKey(name)) {
+			Group group = _UserGroups.get(name);
+			synchronized (group) {
+				group.removeUser(this);
+			}
 			_UserGroups.remove(name);
 			return true;
 		}
@@ -68,26 +73,26 @@ public class User {
 		String targetPhone = message.getTarget();
 
 		if (sourcePhone.equals(_Phone)) {
-			if (!_Messages.containsKey(targetPhone)) {
+			if (!_MessagesRecieved.containsKey(targetPhone)) {
 				List<Message> messageList = new Vector<Message>();
+				_MessagesRead.put(targetPhone, messageList);
 				messageList.add(message);
-				_Messages.put(targetPhone, messageList);
+				_MessagesRecieved.put(targetPhone, messageList);
 			} else {
-				List<Message> messageList = _Messages.get(targetPhone);
+				List<Message> messageList = _MessagesRecieved.get(targetPhone);
 				messageList.add(message);
 			}
 		} else {
-			if (!_Messages.containsKey(sourcePhone)) {
+			if (!_MessagesRecieved.containsKey(sourcePhone)) {
 				List<Message> messageList = new Vector<Message>();
+				_MessagesRead.put(targetPhone, messageList);
 				messageList.add(message);
-				_Messages.put(sourcePhone, messageList);
+				_MessagesRecieved.put(sourcePhone, messageList);
 			} else {
-				List<Message> messageList = _Messages.get(targetPhone);
+				List<Message> messageList = _MessagesRecieved.get(targetPhone);
 				messageList.add(message);
 			}
-
 		}
-
 	}
 
 	/**
@@ -108,10 +113,26 @@ public class User {
 		return _Phone;
 	}
 
+	public List<Message> getNewMessages() {
+		List<Message> result = new Vector<Message>();
+		for (Map.Entry<String, List<Message>> it : _MessagesRecieved.entrySet()) {
+			for (Message message : it.getValue()) {
+				result.add(message);
+			}
+			_MessagesRead.get(it.getKey()).addAll(it.getValue());
+			it.getValue().clear();
+		}
+
+		for (Map.Entry<String, Group> it : _UserGroups.entrySet()) {
+			result.addAll(it.getValue().getNewMessages(_Phone));
+		}
+		return result;
+	}
+
 	public String getMessages(String target) {
 		StringBuilder builder = new StringBuilder();
-		if (_Messages.containsKey(target)) {
-			for (Message message : _Messages.get(target)) {
+		if (_MessagesRead.containsKey(target)) {
+			for (Message message : _MessagesRead.get(target)) {
 				builder.append(message);
 			}
 		}
