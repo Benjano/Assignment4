@@ -29,6 +29,10 @@ public class Main {
 		System.out.println(group.toString());
 		System.out.println(group.addUser(aviv));
 		System.out.println(group.toString());
+		
+		aviv.addMessage(message);
+		
+		System.out.println(aviv.getMessages(nir.getPhone()));
 
 		
 		
