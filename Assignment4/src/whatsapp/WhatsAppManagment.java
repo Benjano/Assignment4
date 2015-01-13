@@ -32,11 +32,11 @@ public class WhatsAppManagment {
 	private Map<String, User> _Users;
 
 	// The users of WhatsApp <name, group>
-	private Map<String, Group> _Group;
+	private Map<String, Group> _Groups;
 
 	private WhatsAppManagment() {
 		_Users = new ConcurrentHashMap<String, User>();
-		_Group = new ConcurrentHashMap<String, Group>();
+		_Groups = new ConcurrentHashMap<String, Group>();
 		_CurrentLoggedUsers = new ConcurrentHashMap<String, User>();
 		_SumOfInstances = new AtomicInteger(0);
 	}
@@ -76,20 +76,16 @@ public class WhatsAppManagment {
 		return null;
 	}
 
-
-
 	private boolean validateHeader(String header) {
 		return header != null && !header.equals("");
 	}
 
 	// ************** URI FUNCTIONS **************
 	public boolean handleLogin(HttpRequest request, HttpResponse response) {
-		boolean result = true;
-		String name = request.getHeader("UserName");
-		String phone = request.getHeader("Phone");
-		result = validateHeader(name) & validateHeader(phone);
+		String name = request.getValue("UserName");
+		String phone = request.getValue("Phone");
 
-		if (result) {
+		if (name != null & phone != null) {
 			User user = getUserCreateIfNotExists(name, phone);
 			String auth = generateCookieCode(name, phone);
 			synchronized (user) {
@@ -98,10 +94,11 @@ public class WhatsAppManagment {
 			response.addHeader("Set-Cookie", "user_auth" + "&" + auth);
 			response.setMessage("Welcome " + user.getName() + "@"
 					+ user.getPhone());
+			return true;
 		} else {
-			response.addHeader("ERROR 765", ErrorMessage.ERROR_765);
+			response.setMessage("ERROR 765: " + ErrorMessage.ERROR_765);
 		}
-		return result;
+		return false;
 	}
 
 	/**
@@ -133,93 +130,100 @@ public class WhatsAppManagment {
 					// Remove the last \n
 					users.substring(0, users.length() - 1);
 					response.setMessage(users);
+					return true;
 				} else if (value.equals("Group")) {
 					value = request.getValue("Group");
-					if (value != null && _Group.containsKey(value)) {
-						response.setMessage(_Group.get(value).toString());
-					} else {
-						response.setMessage("ERROR 273: "
-								+ ErrorMessage.ERROR_273);
-						return false;
+					if (value != null && _Groups.containsKey(value)) {
+						response.setMessage(_Groups.get(value).toString());
+						return true;
 					}
 				} else if (value.equals("Groups")) {
 					String groups = "";
-					for (Map.Entry<String, Group> it : _Group.entrySet()) {
+					for (Map.Entry<String, Group> it : _Groups.entrySet()) {
 						groups += it.getKey() + ": " + it.getValue() + "\n";
 					}
 					// Remove the last \n
 					groups.substring(0, groups.length() - 1);
 					response.setMessage(groups);
-				} else {
-					response.setMessage("ERROR 273: " + ErrorMessage.ERROR_273);
-					return false;
+					return true;
 				}
 			}
 		}
-		return true;
+		response.setMessage("ERROR 273: " + ErrorMessage.ERROR_273);
+		return false;
 	}
 
 	public boolean handleCreateGroup(HttpRequest request, HttpResponse response) {
-		headerChecker = request.getHeader("GroupName");
-		isOk = validateHeader(headerChecker);
-		if (isOk) {
-			if (!_managment.validateGroup(headerChecker)) {
-				try {
-					String decodedUsers = URLDecoder.decode(headerChecker,
-							UTF_8);
-					String[] usersName = decodedUsers.split(",");
-					for (String userName : usersName) {
-						if (!(isOk = _managment.validateUser(userName))) {
-							response.addHeader("ERROR 929",
-									ErrorMessage.ERROR_929 + " " + userName);
-							break;
+		String cookie = request.getHeader(HEADER_COOKIE);
+		if (validateCookie(cookie)) {
+			String groupName = request.getValue("GroupName");
+			String usersRaw = request.getValue("Users");
+			if (groupName != null && usersRaw != null) {
+				if (!_Groups.containsKey(groupName)) {
+					Group group = _Groups.put(groupName, new Group(groupName,
+							_CurrentLoggedUsers.get(cookie)));
+					synchronized (group) {
+						String[] users = usersRaw.split(",");
+						if (users.length > 0) {
+							for (String user : users) {
+								if (!_Users.containsKey(user.trim())) {
+									response.setMessage("ERROR 929: "
+											+ ErrorMessage.ERROR_929 + " "
+											+ user);
+									return false;
+								}
+							}
+							for (String user : users) {
+								group.addUser(_Users.get(user));
+							}
+							return true;
 						}
 					}
-				} catch (UnsupportedEncodingException e) {
-					isOk = false;
-					response.addHeader("ERROR 675", ErrorMessage.ERROR_675);
 				}
-			} else {
-				response.addHeader("ERROR 511", ErrorMessage.ERROR_511);
+				response.setMessage("ERROR 511: " + ErrorMessage.ERROR_511);
+				return false;
 			}
-		} else {
-			response.addHeader("ERROR 675", ErrorMessage.ERROR_675);
+			response.setMessage("ERROR 675: " + ErrorMessage.ERROR_675);
+			return false;
 		}
-		return true;
+		response.setMessage("ERROR 668: " + ErrorMessage.ERROR_668);
+		return false;
 	}
 
 	public boolean handleSend(HttpRequest request, HttpResponse response) {
-		headerChecker = request.getHeader("Type");
-		isOk = validateHeader(headerChecker);
-		if (isOk) {
-			if (headerChecker.equals("Group")) {
-				headerChecker = request.getHeader("Target");
-				isOk = validateHeader(headerChecker);
-				if (isOk) {
-					isOk = _managment.validateGroup(headerChecker);
-					if (!isOk) {
-						response.addHeader("ERROR 771", ErrorMessage.ERROR_771);
+		String cookie = request.getHeader(HEADER_COOKIE);
+		if (validateCookie(cookie)) {
+			String source = _CurrentLoggedUsers.get(cookie).getPhone();
+			String target = request.getValue("Target");
+			String type = request.getValue("Type");
+			String contect = request.getValue("Contect");
+			if (target != null && type != null && contect != null) {
+				if (type.equals("Direct")) {
+					if (_Users.containsKey(target)) {
+						Message message = new Message(source, target, contect);
+						_Users.get(source).addMessage(message);
+						_Users.get(target).addMessage(message);
+						return true;
 					}
-				} else {
-					response.addHeader("ERROR 711", ErrorMessage.ERROR_711);
-				}
-			} else if (headerChecker.equals("Direct")) {
-				headerChecker = request.getHeader("Target");
-				isOk = validateHeader(headerChecker);
-				if (isOk) {
-					isOk = _managment.validatePhoneNumber(headerChecker);
-					if (!isOk) {
-						response.addHeader("ERROR 771", ErrorMessage.ERROR_771);
+					response.setMessage("ERROR 771: " + ErrorMessage.ERROR_771);
+					return false;
+				} else if (type.equals("Group")) {
+					if (_Groups.containsKey(target)) {
+						Message message = new Message(source, target, contect);
+						_Groups.get(target).addMessage(message);
+						return true;
 					}
-				} else {
-					response.addHeader("ERROR 711", ErrorMessage.ERROR_711);
+					response.setMessage("ERROR 771: " + ErrorMessage.ERROR_771);
+					return false;
 				}
-			} else {
-				isOk = false;
-				response.addHeader("ERROR 836", ErrorMessage.ERROR_836);
+				response.setMessage("ERROR 836: " + ErrorMessage.ERROR_836);
+				return false;
 			}
+			response.setMessage("ERROR 711: " + ErrorMessage.ERROR_711);
+			return false;
 		}
-		return true;
+		response.setMessage("ERROR 668: " + ErrorMessage.ERROR_668);
+		return false;
 	}
 
 	public boolean handleAddUser(HttpRequest request, HttpResponse response) {
