@@ -1,10 +1,10 @@
 package protocol_http;
 
-public class MessageImpl implements Message<String> {
+public class MessageString implements Message<String> {
 
 	private String _Message;
 
-	public MessageImpl(String msg) {
+	public MessageString(String msg) {
 		_Message = msg;
 	}
 

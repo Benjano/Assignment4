@@ -15,7 +15,8 @@ public class WhatsAppHttpReqeust extends HttpRequest {
 	public WhatsAppHttpReqeust(String rawMessage) {
 		super(rawMessage);
 		_Values = new LinkedHashMap<String, String>();
-		parseBodyMessage();
+		if (_ReqeustType.equals(RequestType.POST))
+			parseBodyMessage();
 	}
 
 	private void parseBodyMessage() {

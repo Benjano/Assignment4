@@ -1,8 +1,8 @@
 package protocol;
 
-import protocol_http.HttpRequest;
 import protocol_http.HttpResponse;
 import protocol_http.Message;
+import protocol_whatsapp.WhatsAppHttpReqeust;
 import whatsapp.WhatsAppManagment;
 import constants.HttpResultCode;
 import constants.RequestType;
@@ -31,7 +31,8 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	public Message<String> processMessage(Message<String> msg) {
 		if (!isEnd(msg)) {
 			HttpResponse response = new HttpResponse();
-			HttpRequest request = new HttpRequest(msg.toString());
+			WhatsAppHttpReqeust request = new WhatsAppHttpReqeust(
+					msg.toString());
 			response.setResultCode(HttpResultCode.RESULT_OK);
 
 			if (!validateRequest(request)) {
@@ -52,7 +53,8 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	}
 
 	// Process the request by it's URI
-	private void processRequest(HttpRequest request, HttpResponse response) {
+	private void processRequest(WhatsAppHttpReqeust request,
+			HttpResponse response) {
 		if (request.getLocation().equals(LOGIN)) {
 			_managment.handleLogin(request, response);
 			return;
@@ -83,7 +85,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	}
 
 	// Check if the request is written in HttpProtocol
-	private boolean validateRequest(HttpRequest request) {
+	private boolean validateRequest(WhatsAppHttpReqeust request) {
 		if (request.getHttpVersion() != null
 				&& !request.getHttpVersion().equals("HTTP/1.1")
 				|| request.getReqeustType() == RequestType.BAD_REQUEST)

@@ -35,7 +35,7 @@ public class HttpResponse {
 	}
 
 	public Message<String> getMessage() {
-		return new MessageImpl(toString());
+		return new MessageString(toString());
 	}
 
 	@Override

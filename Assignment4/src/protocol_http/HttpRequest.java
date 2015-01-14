@@ -93,7 +93,7 @@ public class HttpRequest {
 	}
 
 	public Message<String> getMessage() {
-		return new MessageImpl(toString());
+		return new MessageString(toString());
 	}
 
 	public String toString() {

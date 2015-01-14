@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.util.Vector;
 
 import protocol_http.Message;
-import protocol_http.MessageImpl;
+import protocol_http.MessageString;
 
 public class TokenizerImpl implements Tokenizer<Message<String>> {
 
@@ -35,7 +35,7 @@ public class TokenizerImpl implements Tokenizer<Message<String>> {
 			return null;
 		}
 
-		return new MessageImpl(builder.toString());
+		return new MessageString(builder.toString());
 
 	}
 
