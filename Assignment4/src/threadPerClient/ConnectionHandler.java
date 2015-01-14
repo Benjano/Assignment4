@@ -61,9 +61,9 @@ public class ConnectionHandler<T> implements Runnable {
 		{
 			System.out.println("Received \"" + msg + "\" from client");
 			T response = protocol.processMessage(msg);
-			System.out.println(response);
 			if (response != null)
 			{
+				System.out.println(response);
 				out.println(response);
 			}
 
@@ -80,7 +80,7 @@ public class ConnectionHandler<T> implements Runnable {
 	{
 		// Initialize I/O
 		in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),"UTF-8"));
-		out = new PrintWriter(clientSocket.getOutputStream());
+		out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(),"UTF-8"), true);
 		tokenizer.addInputStream(new InputStreamReader(clientSocket.getInputStream(),"UTF-8"));
 		System.out.println("I/O initialized");
 	}

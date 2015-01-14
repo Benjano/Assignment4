@@ -7,8 +7,7 @@ public class WhatsAppTokenizerFactory implements TokenizerFactory {
 
 	@Override
 	public Tokenizer create() {
-		// TODO Auto-generated method stub
-		return null;
+		return new tokenizer.TokenizerImpl();
 	}
 
 }

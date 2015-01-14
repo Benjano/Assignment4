@@ -29,18 +29,21 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 
 	@Override
 	public Message<String> processMessage(Message<String> msg) {
-		HttpRequest request = new HttpRequest(msg.toString());
-		HttpResponse response = new HttpResponse();
-		response.setResultCode(HttpResultCode.RESULT_OK);
+		if (!isEnd(msg)) {
+			HttpResponse response = new HttpResponse();
+			HttpRequest request = new HttpRequest(msg.toString());
+			response.setResultCode(HttpResultCode.RESULT_OK);
 
-		if (!validateRequest(request)) {
-			response.setResultCode(HttpResultCode.RESULT_BAD_REQUEST);
+			if (!validateRequest(request)) {
+				response.setResultCode(HttpResultCode.RESULT_BAD_REQUEST);
+				return response.getMessage();
+			}
+
+			processRequest(request, response);
+
 			return response.getMessage();
 		}
-
-		processRequest(request, response);
-
-		return response.getMessage();
+		return null;
 	}
 
 	@Override

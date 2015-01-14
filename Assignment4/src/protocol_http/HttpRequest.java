@@ -2,7 +2,6 @@ package protocol_http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -38,11 +37,22 @@ public class HttpRequest {
 			_Location = tokenizer.nextToken();
 			_HttpVersion = tokenizer.nextToken();
 
-			String[] lines = _RawMessage.substring(_RawMessage.indexOf('\n'))
+			int start = 0;
+			for (int i = 0; i < _RawMessage.length(); i++) {
+				if (_RawMessage.charAt(i) == '\n') {
+					start++;
+				} else
+					break;
+			}
+			_RawMessage = _RawMessage.substring(start, _RawMessage.length());
+			String[] lines = _RawMessage
+					.substring(_RawMessage.indexOf('\n'), _RawMessage.length())
 					.trim().split("\n");
 			String[] values = null;
 
 			for (String line : lines) {
+				line = line.trim();
+				if (line.length()>0){
 				// Check if line is a header
 				if (line.contains(":") & values == null) {
 					line = line.trim();
@@ -78,8 +88,12 @@ public class HttpRequest {
 						return;
 					}
 				}
+				}
 			}
+		}else {
+		_ReqeustType = RequestType.BAD_REQUEST;
 		}
+		return;
 	}
 
 	public String getHeader(String key) {

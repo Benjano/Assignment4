@@ -235,60 +235,71 @@ public class WhatsAppManagment {
 	}
 
 	public boolean handleAddUser(HttpRequest request, HttpResponse response) {
-		// headerChecker2 = request.getHeader("Target");
-		//
-		// if (isOk = validateHeader(headerChecker2)
-		// && (isOk = _managment.validateGroup(headerChecker2))) {
-		// headerChecker = request.getHeader("User");
-		// if (isOk = validateHeader(headerChecker)) {
-		// if (isOk = _managment.validatePhoneNumber(headerChecker)) {
-		// if (isOk = _managment.validateGroupManager(headerChecker)) {
-		// if (!(isOk = !_managment.validateUserInGroup(
-		// headerChecker2, headeChecker))) {
-		// // User is already in group
-		// response.addHeader("ERROR 142",
-		// ErrorMessage.ERROR_142);
-		// }
-		// } else {
-		// // User is not the group manager 
-		// response.addHeader("ERROR 669", ErrorMessage.ERROR_669);
-		// }
-		// } else {
-		// // User does not exists
-		// response.addHeader("ERROR 242", ErrorMessage.ERROR_242);
-		// }
-		// } else {
-		// // Missing parameters
-		// response.addHeader("ERROR 242", ErrorMessage.ERROR_242);
-		// }
-		// } else {
-		// // Group does not exists
-		// response.addHeader("ERROR 770", ErrorMessage.ERROR_770);
-		// }
-		return true;
+		String cookie = request.getHeader(HEADER_COOKIE);
+		if (validateCookie(cookie)) {
+			String source = _CurrentLoggedUsers.get(cookie).getPhone();
+			User sourceUser = _Users.get(source);
+			String targetGroup = request.getValue("Target");
+			String userPhone = request.getValue("User");
+			
+			if (targetGroup != null && userPhone != null) {
+				User targetUser = _Users.get(userPhone);
+				if (_Groups.containsKey(targetGroup)){
+					Group group = _Groups.get(targetGroup);
+					if (group.isUserExistsInGroup(sourceUser) && _Users.containsKey(userPhone)){
+						if ( !group.isUserExistsInGroup(targetUser)){
+							group.addUser(targetUser);
+							response.setMessage(userPhone + " added to "+ group.getGroupName());
+							return true;
+						}
+						response.setMessage("ERROR 142: " + ErrorMessage.ERROR_142);
+						return false;
+					}
+					response.setMessage("ERROR 242: " + ErrorMessage.ERROR_242);
+					return false;
+				}
+				response.setMessage("ERROR 770: " + ErrorMessage.ERROR_770);
+				return false;
+			}
+			response.setMessage("ERROR 669: " + ErrorMessage.ERROR_669);
+			return false;
+		}	
+		response.setMessage("ERROR 669: " + ErrorMessage.ERROR_669);
+		return false;
 	}
-
+	
 	public boolean handleRemoveUser(HttpRequest request, HttpResponse response) {
-		// headerChecker2 = request.getHeader("Target");
-		// isOk = validateHeader(headerChecker2);
-		// if (isOk = validateHeader(headerChecker2)
-		// && _managment.validateGroup(headerChecker2)) {
-		// headerChecker = request.getHeader("User");
-		// if (isOk = validateHeader(headerChecker)
-		// && _managment.validatePhoneNumber(headerChecker)) {
-		// if (isOk) {
-		// isOk = _managment.validateUserInGroup(headerChecker2,
-		// headerChecker);
-		// }
-		// } else {
-		// // User does not exists
-		// response.addHeader("ERROR 336", ErrorMessage.ERROR_336);
-		// }
-		// } else {
-		// // Group does not exists
-		// response.addHeader("ERROR 769", ErrorMessage.ERROR_769);
-		// }
-		return true;
+		String cookie = request.getHeader(HEADER_COOKIE);
+		if (validateCookie(cookie)) {
+			String source = _CurrentLoggedUsers.get(cookie).getPhone();
+			User sourceUser = _Users.get(source);
+			String targetGroup = request.getValue("Target");
+			String userPhone = request.getValue("User");
+			
+			if (targetGroup != null && userPhone != null) {
+				User targetUser = _Users.get(userPhone);
+				if (_Groups.containsKey(targetGroup)){
+					Group group = _Groups.get(targetGroup);
+					if (group.isUserExistsInGroup(sourceUser)){
+						if (group.isUserExistsInGroup(targetUser)){
+							group.removeUser(targetUser);
+							response.setMessage(userPhone + " removed from "+ group.getGroupName());
+							return true;
+						}
+						response.setMessage("ERROR 769: " + ErrorMessage.ERROR_769);
+						return false;
+					}
+					response.setMessage("ERROR 668: " + ErrorMessage.ERROR_668);
+					return false;
+				}
+				response.setMessage("ERROR 769: " + ErrorMessage.ERROR_769);
+				return false;
+			}
+			response.setMessage("ERROR 336: " + ErrorMessage.ERROR_336);
+			return false;
+		}	
+		response.setMessage("ERROR 668: " + ErrorMessage.ERROR_668);
+		return false;
 	}
 
 	public boolean handleQueue(HttpRequest request, HttpResponse response) {
@@ -331,7 +342,7 @@ public class WhatsAppManagment {
 	}
 
 	public boolean validateCookie(String cookie) {
-		if (validateHeader(cookie)) {
+		if (cookie != null & validateHeader(cookie)) {
 			return _CurrentLoggedUsers.containsKey(cookie);
 		}
 		return false;

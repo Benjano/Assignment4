@@ -9,7 +9,7 @@ import protocol_http.MessageImpl;
 
 public class TokenizerImpl implements Tokenizer<Message<String>> {
 
-	private Vector<InputStreamReader> _Readers;
+	private InputStreamReader _Reader;
 	private char _Delimeter;
 	private boolean _isClosed;
 
@@ -22,29 +22,21 @@ public class TokenizerImpl implements Tokenizer<Message<String>> {
 	public Message<String> nextMessage() throws ArrayIndexOutOfBoundsException {
 		int c;
 		StringBuilder builder = new StringBuilder();
-		if (!_Readers.isEmpty()) {
-			InputStreamReader reader = _Readers.get(0);
-			try {
-				while ((c = reader.read()) != -1) {
-					if (c == _Delimeter) {
-						break;
-					} else
-						builder.append((char) c);
-				}
-				if (c == -1) {
-					_Readers.remove(0);
-					if (_Readers.isEmpty()) {
-						_isClosed = true;
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
-			return new MessageImpl(builder.toString());
-		} else {
-			throw new ArrayIndexOutOfBoundsException("No new messages to read");
+		try {
+			while ((c = _Reader.read()) != -1) {
+				if (c == _Delimeter) {
+					break;
+				} else
+					builder.append((char) c);
+			}
+		} catch (IOException e) {
+			System.out.println("Connection Lost");
+			return null;
 		}
+
+		return new MessageImpl(builder.toString());
+
 	}
 
 	@Override
@@ -54,7 +46,9 @@ public class TokenizerImpl implements Tokenizer<Message<String>> {
 
 	@Override
 	public void addInputStream(InputStreamReader inputStreamReader) {
-		_Readers.add(inputStreamReader);
-		_isClosed = false;
+		if (_Reader == null) {
+			_Reader = inputStreamReader;
+			_isClosed = false;
+		}
 	}
 }
