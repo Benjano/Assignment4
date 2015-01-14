@@ -67,7 +67,7 @@ public class User {
 	 * 
 	 * @param message
 	 */
-	public void addMessage(Message message) {
+	public void addMessageFromUser(Message message) {
 
 		String sourcePhone = message.getSource();
 		String targetPhone = message.getTarget();
@@ -93,6 +93,22 @@ public class User {
 				messageList.add(message);
 			}
 		}
+	}
+
+	public void addMessageFromGroup(Message message) {
+
+		String groupName = message.getTarget();
+		
+		if (!_MessagesRecieved.containsKey(groupName)) {
+			List<Message> messageList = new Vector<Message>();
+			_MessagesRead.put(groupName, messageList);
+			messageList.add(message);
+			_MessagesRecieved.put(groupName, messageList);
+		} else {
+			List<Message> messageList = _MessagesRecieved.get(groupName);
+			messageList.add(message);
+		}
+
 	}
 
 	/**

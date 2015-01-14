@@ -46,7 +46,7 @@ public class HttpResponse {
 		for (Entry<String, String> header : _Headers.entrySet()) {
 			builder.append(header.getKey() + ": " + header.getValue() + "\n");
 		}
-		builder.append(_ResponseMessage).append("\n$");
+		builder.append("\n").append(_ResponseMessage).append("\n$");
 		return builder.toString();
 	}
 

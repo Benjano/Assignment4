@@ -29,7 +29,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 
 	@Override
 	public Message<String> processMessage(Message<String> msg) {
-		HttpRequest request = new HttpRequest(msg.getMessage());
+		HttpRequest request = new HttpRequest(msg.toString());
 		HttpResponse response = new HttpResponse();
 		response.setResultCode(HttpResultCode.RESULT_OK);
 
@@ -45,7 +45,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 
 	@Override
 	public boolean isEnd(Message<String> msg) {
-		return msg.getMessage().toLowerCase().equals(SHUTDOWN);
+		return msg.toString().toLowerCase().equals(SHUTDOWN);
 	}
 
 	// Process the request by it's URI
@@ -74,7 +74,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 					response.setResultCode(HttpResultCode.RESULT_NOT_FOUND);
 				}
 			} else {
-				response.setResultCode(HttpResultCode.RESULT_METHOD_NOT_ALLOWED);
+				response.setResultCode(HttpResultCode.RESULT_FORBIDDEN);
 			}
 		}
 	}

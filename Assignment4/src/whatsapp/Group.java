@@ -12,7 +12,6 @@ public class Group {
 	private String _GroupName;
 	private User _GroupManager;
 	private Map<String, User> _UsersInGroup;
-	private List<Message> _GroupMessages;
 
 	/**
 	 * Constuctor
@@ -25,7 +24,6 @@ public class Group {
 		_GroupManager = manager;
 		_UsersInGroup = new ConcurrentHashMap<String, User>();
 		addUser(manager);
-		_GroupMessages = new Vector<Message>();
 	}
 
 	/**
@@ -63,7 +61,9 @@ public class Group {
 	 * @param message
 	 */
 	public void addMessage(Message message) {
-		_GroupMessages.add(message);
+		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
+			it.getValue().addMessageFromGroup(message);
+		}
 	}
 
 	/**

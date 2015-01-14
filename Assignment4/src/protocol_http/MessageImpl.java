@@ -1,6 +1,5 @@
 package protocol_http;
 
-
 public class MessageImpl implements Message<String> {
 
 	private String _Message;
@@ -10,7 +9,7 @@ public class MessageImpl implements Message<String> {
 	}
 
 	@Override
-	public String getMessage() {
+	public String toString() {
 		return _Message;
 	}
 
