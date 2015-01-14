@@ -1,13 +1,13 @@
-package protocol;
+package protocol_whatsapp;
 
-import protocol_http.HttpResponse;
+import protocol.ServerProtocol;
 import protocol_http.Message;
-import protocol_whatsapp.WhatsAppHttpReqeust;
 import whatsapp.WhatsAppManagment;
 import constants.HttpResultCode;
 import constants.RequestType;
 
-public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
+public class WhatsAppServerProtocol implements
+		ServerProtocol<Message<WhatsAppProtocol>> {
 
 	public static final String UTF_8 = "UTF-8";
 	public static final String LOGIN = "/login.jsp";
@@ -28,11 +28,12 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	}
 
 	@Override
-	public Message<String> processMessage(Message<String> msg) {
+	public Message<WhatsAppProtocol> processMessage(
+			Message<WhatsAppProtocol> msg) {
 		if (!isEnd(msg)) {
-			HttpResponse response = new HttpResponse();
+			WhatsAppHttpResponse response = new WhatsAppHttpResponse();
 			WhatsAppHttpReqeust request = new WhatsAppHttpReqeust(
-					msg.toString());
+					msg.getValue());
 			response.setResultCode(HttpResultCode.RESULT_OK);
 
 			if (!validateRequest(request)) {
@@ -48,13 +49,13 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 	}
 
 	@Override
-	public boolean isEnd(Message<String> msg) {
+	public boolean isEnd(Message<WhatsAppProtocol> msg) {
 		return msg.toString().toLowerCase().equals(SHUTDOWN);
 	}
 
 	// Process the request by it's URI
 	private void processRequest(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		if (request.getLocation().equals(LOGIN)) {
 			_managment.handleLogin(request, response);
 			return;
@@ -80,6 +81,7 @@ public class WhatsAppServerProtocol implements ServerProtocol<Message<String>> {
 				}
 			} else {
 				response.setResultCode(HttpResultCode.RESULT_FORBIDDEN);
+				response.setMessage("You are not logged in");
 			}
 		}
 	}

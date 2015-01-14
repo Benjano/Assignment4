@@ -1,10 +1,11 @@
 package main;
 
-import protocol.WhatsAppServerProtocol;
+import constants.RequestType;
 import protocol_http.HttpRequest;
-import protocol_http.MessageString;
+import protocol_http.MessageImpl;
+import protocol_whatsapp.WhatsAppHttpReqeust;
+import protocol_whatsapp.WhatsAppServerProtocol;
 import whatsapp.Group;
-import whatsapp.Message;
 import whatsapp.User;
 
 public class Main {
@@ -13,65 +14,75 @@ public class Main {
 
 		WhatsAppServerProtocol serverProtocol = new WhatsAppServerProtocol();
 
-		protocol_http.Message msgLogin = new MessageString(
-				"POST /login.jsp HTTP/1.1\n UserName=Aviv&Phone=0546310736");
-		System.out.println(serverProtocol.processMessage(msgLogin));
+		HttpRequest requestLogin = new HttpRequest(RequestType.POST,
+				"/login.jsp", "Http/1.1");
+		WhatsAppHttpReqeust whatsAppLogin = new WhatsAppHttpReqeust(
+				requestLogin);
+		whatsAppLogin.addValue("UserName", "Aviv");
+		whatsAppLogin.addValue("Phone", "0543610736");
 
-		protocol_http.Message msgLogin2 = new MessageString(
-				"POST /login.jsp HTTP/1.1\n UserName=Nir&Phone=0545750068");
-		System.out.println(serverProtocol.processMessage(msgLogin2));
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<WhatsAppProtocol>(whatsAppLogin
+						.toString()s, whatsAppLogin)));
 
-		protocol_http.Message msgLogin3 = new MessageString(
-				"POST /login.jsp HTTP/1.1\n UserName=hen&Phone=0547539991");
-		System.out.println(serverProtocol.processMessage(msgLogin3));
-
-		protocol_http.Message msgCreateGroup = new MessageString(
-				"POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Nir&Users=0545750068");
-		System.out.println(serverProtocol.processMessage(msgCreateGroup));
-
-		protocol_http.Message msgCreateGroup2 = new MessageString(
-				"POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Hen&Users=0547539991");
-		System.out.println(serverProtocol.processMessage(msgCreateGroup2));
-
-
-		protocol_http.Message msgListUsers = new MessageString(
-				"POST /list.jsp HTTP/1.1\nCookie: 1\n List=Users");
-		System.out.println(serverProtocol.processMessage(msgListUsers));
-
-
-		protocol_http.Message msgListGroup = new MessageString(
-				"POST /list.jsp HTTP/1.1\nCookie: 1\n List=Group&Group=Aviv and Nir");
-		System.out.println(serverProtocol.processMessage(msgListGroup));
-
-
-		protocol_http.Message msgListGroups = new MessageString(
-				"POST /list.jsp HTTP/1.1\nCookie: 1\n List=Groups");
-		System.out.println(serverProtocol.processMessage(msgListGroups));
-
-		protocol_http.Message msgSendDirect = new MessageString(
-				"POST /send.jsp HTTP/1.1\nCookie: 1\n Type=Direct&Target=0545750068&Contect=May I tell you something?");
-		System.out.println(serverProtocol.processMessage(msgSendDirect));
-
-		protocol_http.Message msgAddUser = new MessageString(
-				"POST /add_user.jsp HTTP/1.1\nCookie: 1\n Target=Aviv and Nir&User=0547539991");
-		System.out.println(serverProtocol.processMessage(msgAddUser));
-
-		protocol_http.Message msgRemoveUser = new MessageString(
-				"POST /remove_user.jsp HTTP/1.1\nCookie: 1\n Target=Aviv and Nir&User=0547539991");
-		System.out.println(serverProtocol.processMessage(msgRemoveUser));
-
-		protocol_http.Message msgQueue = new MessageString(
-				"GET /queue.jsp HTTP/1.1\nCookie: 1");
-		System.out.println(serverProtocol.processMessage(msgQueue));
-
-		protocol_http.Message msgSendToGroup = new MessageString(
-				"POST /send.jsp HTTP/1.1\nCookie: 1\n Type=Group&Target=Aviv and Nir&Contect=Nir, May I tell you something please?");
-		System.out.println(serverProtocol.processMessage(msgSendToGroup));
-
-		System.out.println(serverProtocol.processMessage(msgQueue));
-
-		System.out.println(serverProtocol.processMessage(msgQueue));		
-
+		// protocol_http.Message msgLogin = new MessageImpl(
+		// "POST /login.jsp HTTP/1.1\n UserName=Aviv&Phone=0546310736");
+		// System.out.println(serverProtocol.processMessage(msgLogin));
+		//
+		// protocol_http.Message msgLogin2 = new MessageImpl(
+		// "POST /login.jsp HTTP/1.1\n UserName=Nir&Phone=0545750068");
+		// System.out.println(serverProtocol.processMessage(msgLogin2));
+		//
+		// protocol_http.Message msgLogin3 = new MessageImpl(
+		// "POST /login.jsp HTTP/1.1\n UserName=hen&Phone=0547539991");
+		// System.out.println(serverProtocol.processMessage(msgLogin3));
+		//
+		// protocol_http.Message msgCreateGroup = new MessageImpl(
+		// "POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Nir&Users=0545750068");
+		// System.out.println(serverProtocol.processMessage(msgCreateGroup));
+		//
+		// protocol_http.Message msgCreateGroup2 = new MessageImpl(
+		// "POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Hen&Users=0547539991");
+		// System.out.println(serverProtocol.processMessage(msgCreateGroup2));
+		//
+		//
+		// protocol_http.Message msgListUsers = new MessageImpl(
+		// "POST /list.jsp HTTP/1.1\nCookie: 1\n List=Users");
+		// System.out.println(serverProtocol.processMessage(msgListUsers));
+		//
+		//
+		// protocol_http.Message msgListGroup = new MessageImpl(
+		// "POST /list.jsp HTTP/1.1\nCookie: 1\n List=Group&Group=Aviv and Nir");
+		// System.out.println(serverProtocol.processMessage(msgListGroup));
+		//
+		//
+		// protocol_http.Message msgListGroups = new MessageImpl(
+		// "POST /list.jsp HTTP/1.1\nCookie: 1\n List=Groups");
+		// System.out.println(serverProtocol.processMessage(msgListGroups));
+		//
+		// protocol_http.Message msgSendDirect = new MessageImpl(
+		// "POST /send.jsp HTTP/1.1\nCookie: 1\n Type=Direct&Target=0545750068&Contect=May I tell you something?");
+		// System.out.println(serverProtocol.processMessage(msgSendDirect));
+		//
+		// protocol_http.Message msgAddUser = new MessageImpl(
+		// "POST /add_user.jsp HTTP/1.1\nCookie: 1\n Target=Aviv and Nir&User=0547539991");
+		// System.out.println(serverProtocol.processMessage(msgAddUser));
+		//
+		// protocol_http.Message msgRemoveUser = new MessageImpl(
+		// "POST /remove_user.jsp HTTP/1.1\nCookie: 1\n Target=Aviv and Nir&User=0547539991");
+		// System.out.println(serverProtocol.processMessage(msgRemoveUser));
+		//
+		// protocol_http.Message msgQueue = new MessageImpl(
+		// "GET /queue.jsp HTTP/1.1\nCookie: 1");
+		// System.out.println(serverProtocol.processMessage(msgQueue));
+		//
+		// protocol_http.Message msgSendToGroup = new MessageImpl(
+		// "POST /send.jsp HTTP/1.1\nCookie: 1\n Type=Group&Target=Aviv and Nir&Contect=Nir, May I tell you something please?");
+		// System.out.println(serverProtocol.processMessage(msgSendToGroup));
+		//
+		// System.out.println(serverProtocol.processMessage(msgQueue));
+		//
+		// System.out.println(serverProtocol.processMessage(msgQueue));
 
 		// User nir = new User("nir", "0545750068");
 		// User aviv = new User("aviv", "0546310736");

@@ -1,21 +1,21 @@
-package protocol_http;
+package protocol_whatsapp;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import protocol_http.Message;
+import protocol_http.MessageImpl;
 import constants.HttpResultCode;
 
-public class HttpResponse {
+public class WhatsAppHttpResponse extends WhatsAppProtocol {
 
 	private String _HttpVersion;
 	private int _ResultCode;
 	private Map<String, String> _Headers;
 	private String _ResponseMessage;
 
-	public HttpResponse() {
+	public WhatsAppHttpResponse() {
 		_HttpVersion = "HTTP/1.1";
 		_Headers = new LinkedHashMap<String, String>();
 		_ResponseMessage = "";
@@ -34,8 +34,8 @@ public class HttpResponse {
 		_ResponseMessage = msg;
 	}
 
-	public Message<String> getMessage() {
-		return new MessageString(toString());
+	public Message<WhatsAppProtocol> getMessage() {
+		return new MessageImpl<WhatsAppProtocol>(toString(), this);
 	}
 
 	@Override

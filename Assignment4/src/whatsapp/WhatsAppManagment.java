@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import constants.ErrorMessage;
 import protocol_whatsapp.WhatsAppHttpReqeust;
-import protocol_http.HttpResponse;
+import protocol_whatsapp.WhatsAppHttpResponse;
 
 public class WhatsAppManagment {
 
@@ -81,7 +81,7 @@ public class WhatsAppManagment {
 
 	// ************** URI FUNCTIONS **************
 	public boolean handleLogin(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		String name = request.getValue("UserName");
 		String phone = request.getValue("Phone");
 
@@ -108,7 +108,7 @@ public class WhatsAppManagment {
 	 * @return true if user remove else false
 	 */
 	public boolean handleLogOut(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			response.setMessage("Goodbye");
@@ -118,7 +118,8 @@ public class WhatsAppManagment {
 		return false;
 	}
 
-	public boolean handleList(WhatsAppHttpReqeust request, HttpResponse response) {
+	public boolean handleList(WhatsAppHttpReqeust request,
+			WhatsAppHttpResponse response) {
 		if (validateCookie(request.getHeader(HEADER_COOKIE))) {
 			String value = request.getValue("List");
 			if (value != null) {
@@ -156,7 +157,7 @@ public class WhatsAppManagment {
 	}
 
 	public boolean handleCreateGroup(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			String groupName = request.getValue("GroupName");
@@ -197,7 +198,8 @@ public class WhatsAppManagment {
 		return false;
 	}
 
-	public boolean handleSend(WhatsAppHttpReqeust request, HttpResponse response) {
+	public boolean handleSend(WhatsAppHttpReqeust request,
+			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			String source = _CurrentLoggedUsers.get(cookie).getPhone();
@@ -239,7 +241,7 @@ public class WhatsAppManagment {
 	}
 
 	public boolean handleAddUser(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			String source = _CurrentLoggedUsers.get(cookie).getPhone();
@@ -277,7 +279,7 @@ public class WhatsAppManagment {
 	}
 
 	public boolean handleRemoveUser(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			String source = _CurrentLoggedUsers.get(cookie).getPhone();
@@ -314,7 +316,7 @@ public class WhatsAppManagment {
 	}
 
 	public boolean handleQueue(WhatsAppHttpReqeust request,
-			HttpResponse response) {
+			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			List<Message> messages = _CurrentLoggedUsers.get(cookie)

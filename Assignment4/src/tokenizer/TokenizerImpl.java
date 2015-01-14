@@ -2,12 +2,11 @@ package tokenizer;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Vector;
 
 import protocol_http.Message;
-import protocol_http.MessageString;
+import protocol_http.MessageImpl;
 
-public class TokenizerImpl implements Tokenizer<Message<String>> {
+public class TokenizerImpl<T> implements Tokenizer<Message<T>> {
 
 	private InputStreamReader _Reader;
 	private char _Delimeter;
@@ -19,7 +18,7 @@ public class TokenizerImpl implements Tokenizer<Message<String>> {
 	}
 
 	@Override
-	public Message<String> nextMessage() throws ArrayIndexOutOfBoundsException {
+	public Message<T> nextMessage() throws ArrayIndexOutOfBoundsException {
 		int c;
 		StringBuilder builder = new StringBuilder();
 
@@ -32,10 +31,10 @@ public class TokenizerImpl implements Tokenizer<Message<String>> {
 			}
 		} catch (IOException e) {
 			System.out.println("Connection Lost");
+			_isClosed = true;
 			return null;
 		}
-
-		return new MessageString(builder.toString());
+		return new MessageImpl<T>(builder.toString());
 
 	}
 

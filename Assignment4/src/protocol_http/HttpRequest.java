@@ -7,73 +7,119 @@ import java.util.Map.Entry;
 
 import constants.RequestType;
 
-public class HttpRequest {
+public class HttpRequest extends HttpProtocol {
 
-	private String _RawMessage;
-	protected RequestType _ReqeustType;
+	private RequestType _ReqeustType;
 	private String _Location, _HttpVersion;
-	protected String _MessageBody;
+	protected String _BodyMessage;
 	private Map<String, String> _Headers;
+	private boolean _IsLocked;
 
-	public HttpRequest(String rawMessage) {
-		_RawMessage = rawMessage;
+	public HttpRequest(RequestType type, String location, String httpVersion) {
 		_Headers = new LinkedHashMap<String, String>();
-		parse();
+		_ReqeustType = type;
+		_Location = location;
+		_HttpVersion = httpVersion;
+		_IsLocked = false;
+		_BodyMessage = "";
 	}
 
-	private void parse() {
-		StringTokenizer tokenizer = new StringTokenizer(_RawMessage);
-		if (tokenizer.countTokens() >= 3) {
-			try {
-				_ReqeustType = RequestType.valueOf(tokenizer.nextToken());
-			} catch (Exception e) {
-				_ReqeustType = RequestType.BAD_REQUEST;
-				return;
+	/**
+	 * Copy Constructor
+	 * 
+	 * @param request
+	 */
+//	private HttpRequest(HttpRequest request) {
+//		 request._ReqeustType = _ReqeustType;
+//		 request._Location = _Location;
+//		 request._BodyMessage = _BodyMessage;
+//		 request._Headers = new LinkedHashMap<String, String>();
+//		 request._Headers.putAll(_Headers);
+//		 request._IsLocked = _IsLocked ;
+//	}
+	
+	public HttpRequest(HttpProtocol request) {
+		request.copy(this);
+	}
+	
+	
+	@Override
+	public void copy(HttpProtocol protocol) {
+		protocol.copy(this);
+	}
 
-			}
-			_Location = tokenizer.nextToken();
-			_HttpVersion = tokenizer.nextToken();
+	public void copy(HttpRequest request) {
+		 request._ReqeustType = _ReqeustType;
+		 request._Location = _Location;
+		 request._BodyMessage = _BodyMessage;
+		 request._Headers = new LinkedHashMap<String, String>();
+		 request._Headers.putAll(_Headers);
+		 request._IsLocked = _IsLocked ;
+	}
+	
+	
+	
+	
 
-			int start = 0;
-			for (int i = 0; i < _RawMessage.length(); i++) {
-				if (_RawMessage.charAt(i) == '\n') {
-					start++;
-				} else
-					break;
-			}
-			_RawMessage = _RawMessage.substring(start, _RawMessage.length());
-			String[] lines = _RawMessage
-					.substring(_RawMessage.indexOf('\n'), _RawMessage.length())
-					.trim().split("\n");
+	// private void parse() {
+	// StringTokenizer tokenizer = new StringTokenizer(_RawMessage);
+	// if (tokenizer.countTokens() >= 3) {
+	// try {
+	// _ReqeustType = RequestType.valueOf(tokenizer.nextToken());
+	// } catch (Exception e) {
+	// _ReqeustType = RequestType.BAD_REQUEST;
+	// return;
+	//
+	// }
+	// _Location = tokenizer.nextToken();
+	// _HttpVersion = tokenizer.nextToken();
+	//
+	// int start = 0;
+	// for (int i = 0; i < _RawMessage.length(); i++) {
+	// if (_RawMessage.charAt(i) == '\n') {
+	// start++;
+	// } else
+	// break;
+	// }
+	// _RawMessage = _RawMessage.substring(start, _RawMessage.length());
+	// String[] lines = _RawMessage
+	// .substring(_RawMessage.indexOf('\n'), _RawMessage.length())
+	// .trim().split("\n");
+	//
+	// for (String line : lines) {
+	// line = line.trim();
+	// if (line.length() > 0) {
+	// // Check if line is a header
+	// if (line.contains(":") & _MessageBody == null) {
+	// line = line.trim();
+	// String[] header = line.split(":");
+	// if (header.length == 2) {
+	// _Headers.put(header[0].trim(), header[1].trim());
+	// } else {
+	// _ReqeustType = RequestType.BAD_REQUEST;
+	// return;
+	// }
+	// } else {
+	// if (_ReqeustType == RequestType.POST
+	// & _MessageBody == null) {
+	// _MessageBody = line;
+	// } else {
+	// _ReqeustType = RequestType.BAD_REQUEST;
+	// return;
+	// }
+	// }
+	// }
+	// }
+	// } else {
+	// _ReqeustType = RequestType.BAD_REQUEST;
+	// }
+	// return;
+	// }
 
-			for (String line : lines) {
-				line = line.trim();
-				if (line.length() > 0) {
-					// Check if line is a header
-					if (line.contains(":") & _MessageBody == null) {
-						line = line.trim();
-						String[] header = line.split(":");
-						if (header.length == 2) {
-							_Headers.put(header[0].trim(), header[1].trim());
-						} else {
-							_ReqeustType = RequestType.BAD_REQUEST;
-							return;
-						}
-					} else {
-						if (_ReqeustType == RequestType.POST
-								& _MessageBody == null) {
-							_MessageBody = line;
-						} else {
-							_ReqeustType = RequestType.BAD_REQUEST;
-							return;
-						}
-					}
-				}
-			}
-		} else {
-			_ReqeustType = RequestType.BAD_REQUEST;
+	public void addHeader(String key, String value) {
+		if (!_IsLocked) {
+			_Headers.put(key, value);
 		}
-		return;
 	}
 
 	public String getHeader(String key) {
@@ -92,8 +138,25 @@ public class HttpRequest {
 		return _HttpVersion;
 	}
 
-	public Message<String> getMessage() {
-		return new MessageString(toString());
+	public void setMessageBody(String bodyMessage) {
+		if (!_IsLocked) {
+			_BodyMessage = bodyMessage;
+		}
+	}
+
+	public String getBodyMessage() {
+		return _BodyMessage;
+	}
+
+	public void setBadType() {
+		if (!_IsLocked) {
+			_ReqeustType = RequestType.BAD_REQUEST;
+		}
+	}
+	
+
+	public void lockRequest() {
+		_IsLocked = true;
 	}
 
 	public String toString() {
@@ -105,7 +168,7 @@ public class HttpRequest {
 			builder.append(header.getKey() + ": " + header.getValue() + "\n");
 		}
 
-		builder.append("\n").append(_MessageBody);
+		builder.append("\n").append(_BodyMessage);
 
 		String result = builder.toString();
 		result = result.substring(0, result.length() - 1);

@@ -7,35 +7,41 @@ import java.util.Map;
 
 import constants.RequestType;
 import protocol_http.HttpRequest;
+import protocol_http.HttpProtocol;
 
 public class WhatsAppHttpReqeust extends HttpRequest {
 
 	private Map<String, String> _Values;
 
-	public WhatsAppHttpReqeust(String rawMessage) {
-		super(rawMessage);
+	private boolean _IsLocked;
+
+	public WhatsAppHttpReqeust(HttpProtocol request) {
+		super(request);
 		_Values = new LinkedHashMap<String, String>();
-		if (_ReqeustType.equals(RequestType.POST))
-			parseBodyMessage();
+		_IsLocked = false;
+	}
+	
+	public WhatsAppHttpReqeust(WhatsAppProtocol request) {
+		super(request);
+		request.copy(this);
+	}
+	
+	public void copy(WhatsAppHttpReqeust request){
+		request._IsLocked = _IsLocked;
+		request._Values = new LinkedHashMap<String, String>();
+		request._Values.putAll(_Values);
 	}
 
-	private void parseBodyMessage() {
-		String[] values = _MessageBody.split("&");
-		for (String value : values) {
-			String[] valueSplit = value.split("=");
-			if (valueSplit.length == 2) {
-				try {
-					_Values.put(valueSplit[0].trim(),
-							URLDecoder.decode(valueSplit[1], "UTF-8").trim());
-				} catch (UnsupportedEncodingException e) {
-					_ReqeustType = RequestType.BAD_REQUEST;
-					return;
-				}
-			} else {
-				_ReqeustType = RequestType.BAD_REQUEST;
-				return;
-			}
+	public void addValue(String key, String value) {
+		if (!_IsLocked) {
+			_Values.put(key, value);
 		}
+	}
+
+	@Override
+	public void lockRequest() {
+		super.lockRequest();
+		_IsLocked = true;
 	}
 
 	public String getValue(String key) {
