@@ -1,7 +1,5 @@
 package protocol_http;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -12,15 +10,14 @@ import constants.RequestType;
 public class HttpRequest {
 
 	private String _RawMessage;
-	private RequestType _ReqeustType;
+	protected RequestType _ReqeustType;
 	private String _Location, _HttpVersion;
+	protected String _MessageBody;
 	private Map<String, String> _Headers;
-	private Map<String, String> _Values;
 
 	public HttpRequest(String rawMessage) {
 		_RawMessage = rawMessage;
 		_Headers = new LinkedHashMap<String, String>();
-		_Values = new LinkedHashMap<String, String>();
 		parse();
 	}
 
@@ -48,60 +45,39 @@ public class HttpRequest {
 			String[] lines = _RawMessage
 					.substring(_RawMessage.indexOf('\n'), _RawMessage.length())
 					.trim().split("\n");
-			String[] values = null;
 
 			for (String line : lines) {
 				line = line.trim();
-				if (line.length()>0){
-				// Check if line is a header
-				if (line.contains(":") & values == null) {
-					line = line.trim();
-					String[] header = line.split(":");
-					if (header.length == 2) {
-						_Headers.put(header[0].trim(), header[1].trim());
-					} else {
-						_ReqeustType = RequestType.BAD_REQUEST;
-						return;
-					}
-				} else {
-					if (_ReqeustType == RequestType.POST & values == null) {
-						values = line.split("&");
-						for (String value : values) {
-							String[] valueSplit = value.split("=");
-							if (valueSplit.length == 2) {
-								try {
-									_Values.put(
-											valueSplit[0].trim(),
-											URLDecoder.decode(valueSplit[1],
-													"UTF-8").trim());
-								} catch (UnsupportedEncodingException e) {
-									_ReqeustType = RequestType.BAD_REQUEST;
-									return;
-								}
-							} else {
-								_ReqeustType = RequestType.BAD_REQUEST;
-								return;
-							}
+				if (line.length() > 0) {
+					// Check if line is a header
+					if (line.contains(":") & _MessageBody == null) {
+						line = line.trim();
+						String[] header = line.split(":");
+						if (header.length == 2) {
+							_Headers.put(header[0].trim(), header[1].trim());
+						} else {
+							_ReqeustType = RequestType.BAD_REQUEST;
+							return;
 						}
 					} else {
-						_ReqeustType = RequestType.BAD_REQUEST;
-						return;
+						if (_ReqeustType == RequestType.POST
+								& _MessageBody == null) {
+							_MessageBody = line;
+						} else {
+							_ReqeustType = RequestType.BAD_REQUEST;
+							return;
+						}
 					}
 				}
-				}
 			}
-		}else {
-		_ReqeustType = RequestType.BAD_REQUEST;
+		} else {
+			_ReqeustType = RequestType.BAD_REQUEST;
 		}
 		return;
 	}
 
 	public String getHeader(String key) {
 		return _Headers.get(key);
-	}
-
-	public String getValue(String key) {
-		return _Values.get(key);
 	}
 
 	public RequestType getReqeustType() {
@@ -129,9 +105,8 @@ public class HttpRequest {
 			builder.append(header.getKey() + ": " + header.getValue() + "\n");
 		}
 
-		for (Entry<String, String> value : _Values.entrySet()) {
-			builder.append(value.getKey() + "=" + value.getValue() + "&");
-		}
+		builder.append("\n").append(_MessageBody);
+
 		String result = builder.toString();
 		result = result.substring(0, result.length() - 1);
 		result += "\n$";
