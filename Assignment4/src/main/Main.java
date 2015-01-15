@@ -12,7 +12,6 @@ public class Main {
 	public static void main(String[] args) {
 
 		WhatsAppServerProtocol serverProtocol = new WhatsAppServerProtocol();
-
 		HttpRequest requestLogin = new HttpRequest(HttpType.POST, "/login.jsp",
 				"Http/1.1");
 		WhatsAppHttpReqeust whatsAppLogin = new WhatsAppHttpReqeust(
@@ -22,15 +21,15 @@ public class Main {
 		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppLogin
 						.toString(), whatsAppLogin)));
-		
+
 		WhatsAppHttpReqeust whatsAppLogin2 = new WhatsAppHttpReqeust(
 				requestLogin);
 		whatsAppLogin2.addValue("UserName", "Nir");
 		whatsAppLogin2.addValue("Phone", "0545750068");
 		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppLogin
-						.toString(), whatsAppLogin)));
-		
+						.toString(), whatsAppLogin2)));
+
 		WhatsAppHttpReqeust whatsAppLogin3 = new WhatsAppHttpReqeust(
 				requestLogin);
 		whatsAppLogin3.addValue("UserName", "hen");
@@ -39,100 +38,128 @@ public class Main {
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppLogin
 						.toString(), whatsAppLogin3)));
 
-		// HttpRequest requestLogin = new HttpRequest(HttpType.POST,
-		// "/login.jsp",
-		// "Http/1.1");
+		HttpRequest requestCreateGroup = new HttpRequest(HttpType.POST,
+				"/create_group.jsp", "Http/1.1");
+		requestCreateGroup.addHeader("Cookie", "1");
+
+		WhatsAppHttpReqeust whatsAppCreateGroup = new WhatsAppHttpReqeust(
+				requestCreateGroup);
+		whatsAppCreateGroup.addValue("GroupName", "AvivAndNir");
+		whatsAppCreateGroup.addValue("Users", "0545750068");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppCreateGroup.toString(), whatsAppCreateGroup)));
+
+		HttpRequest requestList = new HttpRequest(HttpType.POST, "/list.jsp",
+				"Http/1.1");
+		requestList.addHeader("Cookie", "1");
+
+		WhatsAppHttpReqeust whatsAppUsersList = new WhatsAppHttpReqeust(
+				requestList);
+		whatsAppUsersList.addValue("List", "Users");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppUsersList
+						.toString(), whatsAppUsersList)));
+
+		WhatsAppHttpReqeust whatsAppUsersGroups = new WhatsAppHttpReqeust(
+				requestList);
+		whatsAppUsersGroups.addValue("List", "Groups");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppUsersGroups.toString(), whatsAppUsersGroups)));
+
+		WhatsAppHttpReqeust whatsAppUsersGroup = new WhatsAppHttpReqeust(
+				requestList);
+		whatsAppUsersGroup.addValue("List", "Group");
+		whatsAppUsersGroup.addValue("Group", "AvivAndNir");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppUsersGroup.toString(), whatsAppUsersGroup)));
+
+		HttpRequest requestSend = new HttpRequest(HttpType.POST, "/send.jsp",
+				"Http/1.1");
+		requestSend.addHeader("Cookie", "1");
+
+		WhatsAppHttpReqeust whatsAppSendDirect = new WhatsAppHttpReqeust(
+				requestSend);
+		whatsAppSendDirect.addValue("Type", "Direct");
+		whatsAppSendDirect.addValue("Target", "0545750068");
+		whatsAppSendDirect.addValue("Contect", "May I tell you something?");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppSendDirect.toString(), whatsAppSendDirect)));
+
 		
-		//
-		// protocol_http.Message msgCreateGroup = new MessageImpl(
-		// "POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Nir&Users=0545750068");
-		// System.out.println(serverProtocol.processMessage(msgCreateGroup));
-		//
-		// protocol_http.Message msgCreateGroup2 = new MessageImpl(
-		// "POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Hen&Users=0547539991");
-		// System.out.println(serverProtocol.processMessage(msgCreateGroup2));
-		//
-		//
-		// protocol_http.Message msgListUsers = new MessageImpl(
-		// "POST /list.jsp HTTP/1.1\nCookie: 1\n List=Users");
-		// System.out.println(serverProtocol.processMessage(msgListUsers));
-		//
-		//
-		// protocol_http.Message msgListGroup = new MessageImpl(
-		// "POST /list.jsp HTTP/1.1\nCookie: 1\n List=Group&Group=Aviv and Nir");
-		// System.out.println(serverProtocol.processMessage(msgListGroup));
-		//
-		//
-		// protocol_http.Message msgListGroups = new MessageImpl(
-		// "POST /list.jsp HTTP/1.1\nCookie: 1\n List=Groups");
-		// System.out.println(serverProtocol.processMessage(msgListGroups));
-		//
-		// protocol_http.Message msgSendDirect = new MessageImpl(
-		// "POST /send.jsp HTTP/1.1\nCookie: 1\n Type=Direct&Target=0545750068&Contect=May I tell you something?");
-		// System.out.println(serverProtocol.processMessage(msgSendDirect));
-		//
-		// protocol_http.Message msgAddUser = new MessageImpl(
-		// "POST /add_user.jsp HTTP/1.1\nCookie: 1\n Target=Aviv and Nir&User=0547539991");
-		// System.out.println(serverProtocol.processMessage(msgAddUser));
-		//
-		// protocol_http.Message msgRemoveUser = new MessageImpl(
-		// "POST /remove_user.jsp HTTP/1.1\nCookie: 1\n Target=Aviv and Nir&User=0547539991");
-		// System.out.println(serverProtocol.processMessage(msgRemoveUser));
-		//
-		// protocol_http.Message msgQueue = new MessageImpl(
-		// "GET /queue.jsp HTTP/1.1\nCookie: 1");
-		// System.out.println(serverProtocol.processMessage(msgQueue));
-		//
-		// protocol_http.Message msgSendToGroup = new MessageImpl(
-		// "POST /send.jsp HTTP/1.1\nCookie: 1\n Type=Group&Target=Aviv and Nir&Contect=Nir, May I tell you something please?");
-		// System.out.println(serverProtocol.processMessage(msgSendToGroup));
-		//
-		// System.out.println(serverProtocol.processMessage(msgQueue));
-		//
-		// System.out.println(serverProtocol.processMessage(msgQueue));
 
-		// User nir = new User("nir", "0545750068");
-		// User aviv = new User("aviv", "0546310736");
-		// User hen = new User("hen", "0547539991");
-		//
-		// Group group = new Group("Nir and Aviv!", nir);
-		// group.addUser(hen);
-		//
-		// Message message = new Message(aviv.getPhone(), nir.getPhone(),
-		// "bdjhbv");
-		//
-		// System.out.println(group.getGroupManagerName());
-		// System.out.println(group.getGroupName());
-		// System.out.println(group.addUser(aviv));
-		// System.out.println(group.addUser(aviv));
-		// System.out.println(group.removeUser(aviv));
-		// System.out.println(group.removeUser(aviv));
-		// System.out.println(group.toString());
-		// System.out.println(group.addUser(aviv));
-		// System.out.println(group.toString());
-		//
-		// aviv.addMessage(message);
-		//
-		// System.out.println(aviv.getMessages(nir.getPhone()));
-		//
-		// String test = "HELLO MY NAME IS ALMO\n";
-		// // String test2 = test.substring(0, test.length()-1);
-		// System.out.println(test);
-		// System.out.println("T");
+		HttpRequest requestAddUser = new HttpRequest(HttpType.POST,
+				"/add_user.jsp", "Http/1.1");
+		requestAddUser.addHeader("Cookie", "1");
 
-		// whatsapp.Message message = new whatsapp.Message(nir,
-		// aviv,"May I tell you something?");
+		WhatsAppHttpReqeust whatsAppAddUser = new WhatsAppHttpReqeust(
+				requestAddUser);
+		whatsAppAddUser.addValue("Target", "AvivAndNir");
+		whatsAppAddUser.addValue("User", "0547539991");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppAddUser
+						.toString(), whatsAppAddUser)));
+		
+		WhatsAppHttpReqeust whatsAppSendGroup = new WhatsAppHttpReqeust(
+				requestSend);
+		whatsAppSendGroup.addValue("Type", "Group");
+		whatsAppSendGroup.addValue("Target", "AvivAndNir");
+		whatsAppSendGroup.addValue("Contect", "NO!");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppSendGroup
+						.toString(), whatsAppSendGroup)));
+		
 
-		// whatsapp.Message message2 = new whatsapp.Message(aviv, nir, "No.");
-		// System.out.println(message);
-		// System.out.println(message2);
+		HttpRequest requestRemoveUser2 = new HttpRequest(HttpType.POST,
+				"/remove_user.jsp", "Http/1.1");
+		requestRemoveUser2.addHeader("Cookie", "2");
 
-		// import protocol.ServerProtocolFactory;
-		// import protocol_http.HttpProtocolFactory;
-		// import protocol_whatsapp.WhatsAppProtocolFactory;
-		// import tokenizer.TokenizerFactory;
-		// import tokenizer_http.HttpTokenizerFactory;
-		// import tokenizer_whatsaap.WhatsAppTokenizerFactory;
+		WhatsAppHttpReqeust whatsAppRemoveUser2 = new WhatsAppHttpReqeust(
+				requestRemoveUser2);
+		whatsAppRemoveUser2.addValue("Target", "AvivAndNir");
+		whatsAppRemoveUser2.addValue("User", "0547539991");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppRemoveUser2.toString(), whatsAppRemoveUser2)));
+
+		HttpRequest requestRemoveUser1 = new HttpRequest(HttpType.POST,
+				"/remove_user.jsp", "Http/1.1");
+		requestRemoveUser1.addHeader("Cookie", "1");
+
+		WhatsAppHttpReqeust whatsAppRemoveUser1 = new WhatsAppHttpReqeust(
+				requestRemoveUser1);
+		whatsAppRemoveUser1.addValue("Target", "AvivAndNir");
+		whatsAppRemoveUser1.addValue("User", "0547539991");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppRemoveUser1.toString(), whatsAppRemoveUser1)));
+
+		HttpRequest requestQueue = new HttpRequest(HttpType.GET, "/queue.jsp",
+				"Http/1.1");
+		requestQueue.addHeader("Cookie", "1");
+
+		WhatsAppHttpReqeust whatsAppQueue1 = new WhatsAppHttpReqeust(
+				requestQueue);
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppQueue1
+						.toString(), whatsAppQueue1)));
+
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppQueue1
+						.toString(), whatsAppQueue1)));
+
+		HttpRequest requestQueue2 = new HttpRequest(HttpType.GET, "/queue.jsp",
+				"Http/1.1");
+		requestQueue2.addHeader("Cookie", "3");
+
+		WhatsAppHttpReqeust whatsAppQueue2 = new WhatsAppHttpReqeust(
+				requestQueue2);
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppQueue2
+						.toString(), whatsAppQueue2)));
+
 	}
-
 }

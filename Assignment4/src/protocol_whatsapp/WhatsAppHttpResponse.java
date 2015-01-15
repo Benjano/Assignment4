@@ -57,7 +57,6 @@ public class WhatsAppHttpResponse implements HttpProtocol {
 		return _ResponseMessage;
 	}
 
-	@Override
 	public String getHeader(String key) {
 		return _Headers.get(key);
 	}

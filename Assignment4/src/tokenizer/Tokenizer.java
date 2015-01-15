@@ -1,6 +1,5 @@
 package tokenizer;
 
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public interface Tokenizer<T> {

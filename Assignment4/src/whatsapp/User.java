@@ -73,23 +73,25 @@ public class User {
 		String targetPhone = message.getTarget();
 
 		if (sourcePhone.equals(_Phone)) {
-			if (!_MessagesRecieved.containsKey(targetPhone)) {
+			if (!_MessagesRecieved.containsKey(targetPhone) && !_Phone.equals(targetPhone)) {
 				List<Message> messageList = new Vector<Message>();
 				_MessagesRead.put(targetPhone, messageList);
-				messageList.add(message);
-				_MessagesRecieved.put(targetPhone, messageList);
+				List<Message> messageList2 = new Vector<Message>();
+				messageList2.add(message);
+				_MessagesRecieved.put(targetPhone, messageList2);
 			} else {
 				List<Message> messageList = _MessagesRecieved.get(targetPhone);
 				messageList.add(message);
 			}
 		} else {
-			if (!_MessagesRecieved.containsKey(sourcePhone)) {
+			if (!_MessagesRecieved.containsKey(sourcePhone) && !_Phone.equals(sourcePhone)) {
 				List<Message> messageList = new Vector<Message>();
-				_MessagesRead.put(targetPhone, messageList);
-				messageList.add(message);
-				_MessagesRecieved.put(sourcePhone, messageList);
+				_MessagesRead.put(sourcePhone, messageList);
+				List<Message> messageList2 = new Vector<Message>();
+				messageList2.add(message);
+				_MessagesRecieved.put(sourcePhone, messageList2);
 			} else {
-				List<Message> messageList = _MessagesRecieved.get(targetPhone);
+				List<Message> messageList = _MessagesRecieved.get(sourcePhone);
 				messageList.add(message);
 			}
 		}

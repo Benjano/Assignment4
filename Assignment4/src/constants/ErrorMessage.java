@@ -3,6 +3,7 @@ package constants;
 public class ErrorMessage {
 	public static final String ERROR_273 = "Missing paramaters";
 	public static final String ERROR_765 = "Cannot login, missing paramaters";
+	public static final String ERROR_764 = "Cannot login, phone is already exists";
 	public static final String ERROR_675 = "Cannot create group, missing paramaters";
 	public static final String ERROR_929 = "Unknown User";
 	public static final String ERROR_511 = "Group Name Already Taken";
@@ -16,4 +17,5 @@ public class ErrorMessage {
 	public static final String ERROR_668 = "Premission denied";
 	public static final String ERROR_336 = "Cannot remove, missing parameters";
 	public static final String ERROR_769 = "Target does not exist";
+	public static final String ERROR_609 = "Group does not exists";
 }

@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import constants.ErrorMessage;
 import protocol_whatsapp.WhatsAppHttpReqeust;
 import protocol_whatsapp.WhatsAppHttpResponse;
+import constants.ErrorMessage;
 
 public class WhatsAppManagment {
 
@@ -71,6 +71,7 @@ public class WhatsAppManagment {
 
 	private String generateCookieCode(String name, String phone) {
 		return new BigInteger(30, random).toString(32) + phone;
+		// return _Users.size() + "";
 	}
 
 	private User getUserCreateIfNotExists(String name, String phone) {
@@ -90,13 +91,16 @@ public class WhatsAppManagment {
 
 		if (name != null & phone != null) {
 			User user = getUserCreateIfNotExists(name, phone);
-			String auth = generateCookieCode(name, phone);
-			synchronized (user) {
-				_CurrentLoggedUsers.put(auth, user);
+			if (user.getName().equals(name)) {
+				String auth = generateCookieCode(name, phone);
+				synchronized (user) {
+					_CurrentLoggedUsers.put(auth, user);
+				}
+				response.addHeader("Set-Cookie", "user_auth" + "&" + auth);
+				response.setMessage("Welcome " + user);
+				return true;
 			}
-			response.addHeader("Set-Cookie", "user_auth" + "&" + auth);
-			response.setMessage("Welcome " + user);
-			return true;
+			response.setMessage("ERROR 764: " + ErrorMessage.ERROR_764);
 		} else {
 			response.setMessage("ERROR 765: " + ErrorMessage.ERROR_765);
 		}
@@ -140,6 +144,10 @@ public class WhatsAppManagment {
 					if (value != null && _Groups.containsKey(value)) {
 						response.setMessage(_Groups.get(value).toString());
 						return true;
+					} else {
+						response.setMessage("ERROR 609: "
+								+ ErrorMessage.ERROR_609);
+						return false;
 					}
 				} else if (value.equals("Groups")) {
 					String groups = "";
@@ -208,14 +216,14 @@ public class WhatsAppManagment {
 			String source = _CurrentLoggedUsers.get(cookie).getPhone();
 			String target = request.getValue("Target");
 			String type = request.getValue("Type");
-			String contect = request.getValue("Contect");
+			String contect = request.getValue("Content");
 			if (target != null && type != null && contect != null) {
 				if (type.equals("Direct")) {
 					if (_Users.containsKey(target)) {
 						Message message = new Message(source, target, contect);
 						_Users.get(source).addMessageFromUser(message);
 						_Users.get(target).addMessageFromUser(message);
-						response.setMessage("Message Send");
+						response.setMessage("Message Sent");
 						return true;
 					}
 					response.setMessage("ERROR 771: " + ErrorMessage.ERROR_771);
@@ -226,7 +234,7 @@ public class WhatsAppManagment {
 							Message message = new Message(source, target,
 									contect);
 							_Groups.get(target).addMessage(message);
-							response.setMessage("Message Send");
+							response.setMessage("Message Sent");
 							return true;
 						}
 					}
@@ -294,7 +302,8 @@ public class WhatsAppManagment {
 				User targetUser = _Users.get(userPhone);
 				if (_Groups.containsKey(targetGroup)) {
 					Group group = _Groups.get(targetGroup);
-					if (group.isUserExistsInGroup(sourceUser)) {
+					if (group.getGroupManagerPhone().equals(
+							sourceUser.getPhone())) {
 						if (group.isUserExistsInGroup(targetUser)) {
 							group.removeUser(targetUser);
 							response.setMessage(userPhone + " removed from "

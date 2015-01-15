@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import protocol.ServerProtocolFactory;
+import protocol_http.HttpProtocol;
+import protocol_http.Message;
 import protocol_whatsapp.WhatsAppProtocolFactory;
 import tokenizer.TokenizerFactory;
 import tokenizer_whatsapp.WhatsAppTokenizerFactory;
@@ -33,7 +35,7 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 
 		while (true) {
 			try {
-				ConnectionHandler newConnection = new ConnectionHandler(
+				ConnectionHandler<T> newConnection = new ConnectionHandler<T>(
 						serverSocket.accept(), _protocolFactory.create(),
 						_tokenizerFactory.create());
 				new Thread(newConnection).start();
@@ -43,8 +45,6 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 		}
 	}
 
-	
-
 	// Closes the connection
 	public void close() throws IOException {
 		serverSocket.close();
@@ -52,13 +52,13 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 
 	public static void main(String[] args) throws IOException {
 		// Get port
-//		int port = Integer.decode(args[0]).intValue();
+		// int port = Integer.decode(args[0]).intValue();
 
-		int port = 6667;
+		int port = 5555;
 		// MultipleClientProtocolServer server = new
 		// MultipleClientProtocolServer(port, new HttpProtocolFactory(), new
 		// HttpTokenizerFactory());
-		MultipleClientProtocolServer server = new MultipleClientProtocolServer(
+		MultipleClientProtocolServer<Message<HttpProtocol>> server = new MultipleClientProtocolServer<Message<HttpProtocol>>(
 				port, new WhatsAppProtocolFactory(),
 				new WhatsAppTokenizerFactory());
 		Thread serverThread = new Thread(server);
