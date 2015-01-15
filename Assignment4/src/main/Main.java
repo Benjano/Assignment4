@@ -1,12 +1,11 @@
 package main;
 
-import constants.RequestType;
+import constants.HttpType;
+import protocol_http.HttpProtocol;
 import protocol_http.HttpRequest;
 import protocol_http.MessageImpl;
 import protocol_whatsapp.WhatsAppHttpReqeust;
 import protocol_whatsapp.WhatsAppServerProtocol;
-import whatsapp.Group;
-import whatsapp.User;
 
 public class Main {
 
@@ -14,28 +13,36 @@ public class Main {
 
 		WhatsAppServerProtocol serverProtocol = new WhatsAppServerProtocol();
 
-		HttpRequest requestLogin = new HttpRequest(RequestType.POST,
-				"/login.jsp", "Http/1.1");
+		HttpRequest requestLogin = new HttpRequest(HttpType.POST, "/login.jsp",
+				"Http/1.1");
 		WhatsAppHttpReqeust whatsAppLogin = new WhatsAppHttpReqeust(
 				requestLogin);
 		whatsAppLogin.addValue("UserName", "Aviv");
 		whatsAppLogin.addValue("Phone", "0543610736");
-
 		System.out.println(serverProtocol
-				.processMessage(new MessageImpl<WhatsAppProtocol>(whatsAppLogin
-						.toString()s, whatsAppLogin)));
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppLogin
+						.toString(), whatsAppLogin)));
+		
+		WhatsAppHttpReqeust whatsAppLogin2 = new WhatsAppHttpReqeust(
+				requestLogin);
+		whatsAppLogin2.addValue("UserName", "Nir");
+		whatsAppLogin2.addValue("Phone", "0545750068");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppLogin
+						.toString(), whatsAppLogin)));
+		
+		WhatsAppHttpReqeust whatsAppLogin3 = new WhatsAppHttpReqeust(
+				requestLogin);
+		whatsAppLogin3.addValue("UserName", "hen");
+		whatsAppLogin3.addValue("Phone", "0547539991");
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppLogin
+						.toString(), whatsAppLogin3)));
 
-		// protocol_http.Message msgLogin = new MessageImpl(
-		// "POST /login.jsp HTTP/1.1\n UserName=Aviv&Phone=0546310736");
-		// System.out.println(serverProtocol.processMessage(msgLogin));
-		//
-		// protocol_http.Message msgLogin2 = new MessageImpl(
-		// "POST /login.jsp HTTP/1.1\n UserName=Nir&Phone=0545750068");
-		// System.out.println(serverProtocol.processMessage(msgLogin2));
-		//
-		// protocol_http.Message msgLogin3 = new MessageImpl(
-		// "POST /login.jsp HTTP/1.1\n UserName=hen&Phone=0547539991");
-		// System.out.println(serverProtocol.processMessage(msgLogin3));
+		// HttpRequest requestLogin = new HttpRequest(HttpType.POST,
+		// "/login.jsp",
+		// "Http/1.1");
+		
 		//
 		// protocol_http.Message msgCreateGroup = new MessageImpl(
 		// "POST /create_group.jsp HTTP/1.1\nCookie: 1\n GroupName=Aviv and Nir&Users=0545750068");

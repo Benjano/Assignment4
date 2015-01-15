@@ -1,13 +1,14 @@
 package protocol_whatsapp;
 
 import protocol.ServerProtocol;
+import protocol_http.HttpProtocol;
 import protocol_http.Message;
 import whatsapp.WhatsAppManagment;
 import constants.HttpResultCode;
-import constants.RequestType;
+import constants.HttpType;
 
 public class WhatsAppServerProtocol implements
-		ServerProtocol<Message<WhatsAppProtocol>> {
+		ServerProtocol<Message<HttpProtocol>> {
 
 	public static final String UTF_8 = "UTF-8";
 	public static final String LOGIN = "/login.jsp";
@@ -28,16 +29,15 @@ public class WhatsAppServerProtocol implements
 	}
 
 	@Override
-	public Message<WhatsAppProtocol> processMessage(
-			Message<WhatsAppProtocol> msg) {
+	public Message<HttpProtocol> processMessage(Message<HttpProtocol> msg) {
 		if (!isEnd(msg)) {
 			WhatsAppHttpResponse response = new WhatsAppHttpResponse();
-			WhatsAppHttpReqeust request = new WhatsAppHttpReqeust(
-					msg.getValue());
+			WhatsAppHttpReqeust request = (WhatsAppHttpReqeust) (msg.getValue());
 			response.setResultCode(HttpResultCode.RESULT_OK);
 
 			if (!validateRequest(request)) {
 				response.setResultCode(HttpResultCode.RESULT_BAD_REQUEST);
+				response.setMessage("Your request is not a valid http request");
 				return response.getMessage();
 			}
 
@@ -49,7 +49,7 @@ public class WhatsAppServerProtocol implements
 	}
 
 	@Override
-	public boolean isEnd(Message<WhatsAppProtocol> msg) {
+	public boolean isEnd(Message<HttpProtocol> msg) {
 		return msg.toString().toLowerCase().equals(SHUTDOWN);
 	}
 
@@ -89,8 +89,8 @@ public class WhatsAppServerProtocol implements
 	// Check if the request is written in HttpProtocol
 	private boolean validateRequest(WhatsAppHttpReqeust request) {
 		if (request.getHttpVersion() != null
-				&& !request.getHttpVersion().equals("HTTP/1.1")
-				|| request.getReqeustType() == RequestType.BAD_REQUEST)
+				&& !request.getHttpVersion().toUpperCase().equals("HTTP/1.1")
+				|| request.getReqeustType() == HttpType.BAD_REQUEST)
 			return false;
 		return true;
 	}

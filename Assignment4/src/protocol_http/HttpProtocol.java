@@ -1,12 +1,19 @@
 package protocol_http;
 
+import constants.HttpType;
 
-public abstract class HttpProtocol {
+public interface HttpProtocol {
 
-	public void copy(HttpProtocol protocol) {
-		protocol.copy(this);
-	}
+	public String getBodyMessage();
+
+	public String getHeader(String key);
+
+	public HttpType getReqeustType();
+
+	public String getLocation();
+
+	public String getHttpVersion();
 	
-	public abstract void copy(HttpRequest protocol);
+	public String[][] getAllHeaders();
 
 }

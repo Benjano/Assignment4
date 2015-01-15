@@ -3,8 +3,6 @@ package tokenizer_whatsapp;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import constants.RequestType;
-import protocol_http.HttpRequest;
 import protocol_http.HttpProtocol;
 import protocol_http.Message;
 import protocol_http.MessageImpl;

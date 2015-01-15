@@ -2,7 +2,7 @@ package tokenizer_http;
 
 import java.util.StringTokenizer;
 
-import constants.RequestType;
+import constants.HttpType;
 import protocol_http.HttpRequest;
 import protocol_http.HttpProtocol;
 import protocol_http.Message;
@@ -21,11 +21,11 @@ public class HttpTokenizer<T> extends TokenizerImpl<HttpProtocol> {
 		StringTokenizer tokenizer = new StringTokenizer(rawMessage);
 
 		String location, httpVersion;
-		RequestType requestType = RequestType.BAD_REQUEST;
+		HttpType requestType = HttpType.BAD_REQUEST;
 
 		if (tokenizer.countTokens() >= 3) {
 			try {
-				requestType = RequestType.valueOf(tokenizer.nextToken());
+				requestType = HttpType.valueOf(tokenizer.nextToken());
 			} catch (Exception e) {
 				return null;
 			}
@@ -64,7 +64,7 @@ public class HttpTokenizer<T> extends TokenizerImpl<HttpProtocol> {
 							return null;
 						}
 					} else {
-						if (request.getReqeustType() == RequestType.POST
+						if (request.getReqeustType() == HttpType.POST
 								& bodyMessage == null) {
 							bodyMessage = line;
 							request.setMessageBody(bodyMessage);

@@ -1,5 +1,7 @@
 package whatsapp;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,8 @@ public class WhatsAppManagment {
 
 	// The users of WhatsApp <name, group>
 	private Map<String, Group> _Groups;
+
+	private SecureRandom random = new SecureRandom();
 
 	private WhatsAppManagment() {
 		_Users = new ConcurrentHashMap<String, User>();
@@ -66,8 +70,7 @@ public class WhatsAppManagment {
 	}
 
 	private String generateCookieCode(String name, String phone) {
-		// TODO Auto-generated method stub
-		return _Users.size() + "";
+		return new BigInteger(30, random).toString(32) + phone;
 	}
 
 	private User getUserCreateIfNotExists(String name, String phone) {

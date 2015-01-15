@@ -4,11 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import protocol_http.HttpProtocol;
 import protocol_http.Message;
 import protocol_http.MessageImpl;
 import constants.HttpResultCode;
+import constants.HttpType;
 
-public class WhatsAppHttpResponse extends WhatsAppProtocol {
+public class WhatsAppHttpResponse implements HttpProtocol {
 
 	private String _HttpVersion;
 	private int _ResultCode;
@@ -34,8 +36,8 @@ public class WhatsAppHttpResponse extends WhatsAppProtocol {
 		_ResponseMessage = msg;
 	}
 
-	public Message<WhatsAppProtocol> getMessage() {
-		return new MessageImpl<WhatsAppProtocol>(toString(), this);
+	public Message<HttpProtocol> getMessage() {
+		return new MessageImpl<HttpProtocol>(toString(), this);
 	}
 
 	@Override
@@ -48,6 +50,43 @@ public class WhatsAppHttpResponse extends WhatsAppProtocol {
 		}
 		builder.append("\n").append(_ResponseMessage).append("\n$");
 		return builder.toString();
+	}
+
+	@Override
+	public String getBodyMessage() {
+		return _ResponseMessage;
+	}
+
+	@Override
+	public String getHeader(String key) {
+		return _Headers.get(key);
+	}
+
+	@Override
+	public HttpType getReqeustType() {
+		return HttpType.RESPONSE;
+	}
+
+	@Override
+	public String getLocation() {
+		return "";
+	}
+
+	@Override
+	public String getHttpVersion() {
+		return _HttpVersion;
+	}
+
+	@Override
+	public String[][] getAllHeaders() {
+		String[][] result = new String[_Headers.size()][2];
+		int row = 0;
+		for (Entry<String, String> header : _Headers.entrySet()) {
+			result[row][0] = header.getKey();
+			result[row][1] = header.getValue();
+			row++;
+		}
+		return result;
 	}
 
 }

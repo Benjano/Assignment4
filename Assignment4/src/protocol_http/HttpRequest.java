@@ -5,17 +5,17 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
-import constants.RequestType;
+import constants.HttpType;
 
-public class HttpRequest extends HttpProtocol {
+public class HttpRequest implements HttpProtocol {
 
-	private RequestType _ReqeustType;
+	private HttpType _ReqeustType;
 	private String _Location, _HttpVersion;
 	protected String _BodyMessage;
 	private Map<String, String> _Headers;
 	private boolean _IsLocked;
 
-	public HttpRequest(RequestType type, String location, String httpVersion) {
+	public HttpRequest(HttpType type, String location, String httpVersion) {
 		_Headers = new LinkedHashMap<String, String>();
 		_ReqeustType = type;
 		_Location = location;
@@ -29,37 +29,27 @@ public class HttpRequest extends HttpProtocol {
 	 * 
 	 * @param request
 	 */
-//	private HttpRequest(HttpRequest request) {
-//		 request._ReqeustType = _ReqeustType;
-//		 request._Location = _Location;
-//		 request._BodyMessage = _BodyMessage;
-//		 request._Headers = new LinkedHashMap<String, String>();
-//		 request._Headers.putAll(_Headers);
-//		 request._IsLocked = _IsLocked ;
-//	}
-	
 	public HttpRequest(HttpProtocol request) {
-		request.copy(this);
-	}
-	
-	
-	@Override
-	public void copy(HttpProtocol protocol) {
-		protocol.copy(this);
+		_ReqeustType = request.getReqeustType();
+		_Location = request.getLocation();
+		_BodyMessage = request.getBodyMessage();
+		_HttpVersion = request.getHttpVersion();
+		_Headers = new LinkedHashMap<String, String>();
+		String[][] headers = request.getAllHeaders();
+		for (String[] header : headers) {
+			_Headers.put(header[0], header[1]);
+		}
+		lockRequest();
 	}
 
-	public void copy(HttpRequest request) {
-		 request._ReqeustType = _ReqeustType;
-		 request._Location = _Location;
-		 request._BodyMessage = _BodyMessage;
-		 request._Headers = new LinkedHashMap<String, String>();
-		 request._Headers.putAll(_Headers);
-		 request._IsLocked = _IsLocked ;
-	}
-	
-	
-	
-	
+	// private HttpRequest(H request) {
+	// request._ReqeustType = request._ReqeustType;
+	// request._Location = request._Location;
+	// request._BodyMessage = request._BodyMessage;
+	// request._Headers = new LinkedHashMap<String, String>();
+	// request._Headers.putAll(request._Headers);
+	// request._IsLocked = request._IsLocked ;
+	// }
 
 	// private void parse() {
 	// StringTokenizer tokenizer = new StringTokenizer(_RawMessage);
@@ -122,18 +112,22 @@ public class HttpRequest extends HttpProtocol {
 		}
 	}
 
+	@Override
 	public String getHeader(String key) {
 		return _Headers.get(key);
 	}
 
-	public RequestType getReqeustType() {
+	@Override
+	public HttpType getReqeustType() {
 		return _ReqeustType;
 	}
 
+	@Override
 	public String getLocation() {
 		return _Location;
 	}
 
+	@Override
 	public String getHttpVersion() {
 		return _HttpVersion;
 	}
@@ -144,16 +138,28 @@ public class HttpRequest extends HttpProtocol {
 		}
 	}
 
+	@Override
+	public String[][] getAllHeaders() {
+		String[][] result = new String[_Headers.size()][2];
+		int row = 0;
+		for (Entry<String, String> header : _Headers.entrySet()) {
+			result[row][0] = header.getKey();
+			result[row][1] = header.getValue();
+			row++;
+		}
+		return result;
+	}
+
+	@Override
 	public String getBodyMessage() {
 		return _BodyMessage;
 	}
 
 	public void setBadType() {
 		if (!_IsLocked) {
-			_ReqeustType = RequestType.BAD_REQUEST;
+			_ReqeustType = HttpType.BAD_REQUEST;
 		}
 	}
-	
 
 	public void lockRequest() {
 		_IsLocked = true;
@@ -175,4 +181,5 @@ public class HttpRequest extends HttpProtocol {
 		result += "\n$";
 		return result;
 	}
+
 }
