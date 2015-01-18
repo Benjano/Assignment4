@@ -14,6 +14,7 @@ public class ErrorMessage {
 	public static final String ERROR_242 = "Cannot add user, missing parameters";
 	public static final String ERROR_142 = "Cannot add user, user already in group";
 	public static final String ERROR_770 = "Target Does not Exist";
+	public static final String ERROR_773 = "Cannot remove the manager of the group, Group is not empty";
 	public static final String ERROR_668 = "Premission denied";
 	public static final String ERROR_336 = "Cannot remove, missing parameters";
 	public static final String ERROR_769 = "Target does not exist";

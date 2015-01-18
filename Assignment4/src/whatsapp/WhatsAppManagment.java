@@ -2,6 +2,7 @@ package whatsapp;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,16 +84,16 @@ public class WhatsAppManagment {
 		return user;
 	}
 
-	private User getUserByName(String name){
+	private User getUserByName(String name) {
 		for (Map.Entry<String, User> it : _Users.entrySet()) {
-			if( it.getValue().getName().equals(name)){
-				User user= it.getValue();
+			if (it.getValue().getName().equals(name)) {
+				User user = it.getValue();
 				return user;
 			}
 		}
 		return null;
 	}
-	
+
 	// ************** URI FUNCTIONS **************
 	public boolean handleLogin(WhatsAppHttpReqeust request,
 			WhatsAppHttpResponse response) {
@@ -191,11 +192,15 @@ public class WhatsAppManagment {
 			if (groupName != null && usersRaw != null) {
 				String[] users = usersRaw.split(",");
 				if (users.length > 0) {
-					for (String user : users) {
-						if (!_Users.containsKey(user.trim())) {
+					ArrayList<User> usersList = new ArrayList<User>();
+					for (String userName : users) {
+						User user = getUserByName(userName.trim());
+						if (user == null) {
 							response.setMessage("ERROR 929: "
-									+ ErrorMessage.ERROR_929 + " " + user);
+									+ ErrorMessage.ERROR_929 + " " + userName);
 							return false;
+						} else {
+							usersList.add(user);
 						}
 					}
 					synchronized (_Groups) {
@@ -203,8 +208,8 @@ public class WhatsAppManagment {
 							_Groups.put(groupName, new Group(groupName,
 									_CurrentLoggedUsers.get(cookie)));
 							Group group = _Groups.get(groupName);
-							for (String user : users) {
-								group.addUser(_Users.get(user));
+							for (User user : usersList) {
+								group.addUser(user);
 							}
 							response.setMessage("Group " + groupName
 									+ " Created");
@@ -322,11 +327,18 @@ public class WhatsAppManagment {
 					Group group = _Groups.get(targetGroup);
 					if (group.getGroupManagerPhone().equals(
 							sourceUser.getPhone())) {
-						if (group.isUserExistsInGroup(targetUser)
-								& group.removeUser(targetUser)) {
-							response.setMessage(userPhone + " removed from "
-									+ group.getGroupName());
-							return true;
+						if (group.isUserExistsInGroup(targetUser)) {
+							if (group.removeUser(targetUser)) {
+								response.setMessage(userPhone
+										+ " removed from "
+										+ group.getGroupName());
+								if (group.isEmpty())
+									_Groups.remove(group.getGroupName());
+								return true;
+							}
+							response.setMessage("ERROR 773: "
+									+ ErrorMessage.ERROR_773);
+							return false;
 						}
 						response.setMessage("ERROR 769: "
 								+ ErrorMessage.ERROR_769);

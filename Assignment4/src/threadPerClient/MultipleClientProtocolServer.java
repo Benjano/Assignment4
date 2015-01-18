@@ -26,14 +26,16 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 	}
 
 	public void run() {
+		boolean isPortOk = true;
 		try {
 			serverSocket = new ServerSocket(listenPort);
 			System.out.println("Listening...");
 		} catch (IOException e) {
+			isPortOk = false;
 			System.out.println("Cannot listen on port " + listenPort);
 		}
 
-		while (true) {
+		while (true & isPortOk) {
 			try {
 				ConnectionHandler<T> newConnection = new ConnectionHandler<T>(
 						serverSocket.accept(), _protocolFactory.create(),

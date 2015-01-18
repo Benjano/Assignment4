@@ -49,8 +49,10 @@ public class Group {
 	public boolean removeUser(User user) {
 		synchronized (_UsersInGroup) {
 			if (_UsersInGroup.containsKey(user.getPhone())
-					&& !_GroupManager.equals(user)) {
+					&& (_UsersInGroup.size() > 1 && !_GroupManager.equals(user))
+					|| (_UsersInGroup.size() == 1 && _GroupManager.equals(user))) {
 				_UsersInGroup.remove(user.getPhone());
+				user.removeGroup(_GroupName);
 				return true;
 			}
 			return false;
@@ -102,7 +104,14 @@ public class Group {
 	 * @return boolean true if the user exists else false
 	 */
 	public boolean isUserExistsInGroup(User user) {
-		return _UsersInGroup.get(user.getPhone()) != null;
+		return _UsersInGroup.containsKey(user.getPhone());
+	}
+	/**
+	 * Check if the goup is empty
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return _UsersInGroup.isEmpty();
 	}
 
 	@Override
@@ -116,8 +125,5 @@ public class Group {
 		return builder.toString();
 	}
 
-	public Collection<? extends Message> getNewMessages(String _Phone) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 }
