@@ -70,8 +70,8 @@ public class WhatsAppManagment {
 	}
 
 	private String generateCookieCode(String name, String phone) {
-		return new BigInteger(30, random).toString(32) + phone;
-		// return _Users.size() + "";
+		// return new BigInteger(30, random).toString(32) + phone;
+		return _Users.size() + "";
 	}
 
 	private User getUserCreateIfNotExists(String name, String phone) {
@@ -83,6 +83,16 @@ public class WhatsAppManagment {
 		return user;
 	}
 
+	private User getUserByName(String name){
+		for (Map.Entry<String, User> it : _Users.entrySet()) {
+			if( it.getValue().getName().equals(name)){
+				User user= it.getValue();
+				return user;
+			}
+		}
+		return null;
+	}
+	
 	// ************** URI FUNCTIONS **************
 	public boolean handleLogin(WhatsAppHttpReqeust request,
 			WhatsAppHttpResponse response) {
@@ -119,7 +129,10 @@ public class WhatsAppManagment {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
 			response.setMessage("Goodbye");
-			_CurrentLoggedUsers.remove(cookie);
+			User user = _CurrentLoggedUsers.get(cookie);
+			synchronized (user) {
+				_CurrentLoggedUsers.remove(cookie);
+			}
 			return true;
 		}
 		return false;
@@ -155,7 +168,9 @@ public class WhatsAppManagment {
 						groups += it.getKey() + ": " + it.getValue() + "\n";
 					}
 					// Remove the last \n
-					groups = groups.substring(0, groups.length() - 1);
+					if (groups.length() > 0) {
+						groups = groups.substring(0, groups.length() - 1);
+					}
 					response.setMessage(groups);
 					return true;
 				}
@@ -174,32 +189,34 @@ public class WhatsAppManagment {
 			String groupName = request.getValue("GroupName");
 			String usersRaw = request.getValue("Users");
 			if (groupName != null && usersRaw != null) {
-				if (!_Groups.containsKey(groupName)) {
-					_Groups.put(groupName, new Group(groupName,
-							_CurrentLoggedUsers.get(cookie)));
-					Group group = _Groups.get(groupName);
-					synchronized (group) {
-						String[] users = usersRaw.split(",");
-						if (users.length > 0) {
-							for (String user : users) {
-								if (!_Users.containsKey(user.trim())) {
-									response.setMessage("ERROR 929: "
-											+ ErrorMessage.ERROR_929 + " "
-											+ user);
-									return false;
-								}
-							}
+				String[] users = usersRaw.split(",");
+				if (users.length > 0) {
+					for (String user : users) {
+						if (!_Users.containsKey(user.trim())) {
+							response.setMessage("ERROR 929: "
+									+ ErrorMessage.ERROR_929 + " " + user);
+							return false;
+						}
+					}
+					synchronized (_Groups) {
+						if (!_Groups.containsKey(groupName)) {
+							_Groups.put(groupName, new Group(groupName,
+									_CurrentLoggedUsers.get(cookie)));
+							Group group = _Groups.get(groupName);
 							for (String user : users) {
 								group.addUser(_Users.get(user));
 							}
-
 							response.setMessage("Group " + groupName
 									+ " Created");
 							return true;
+						} else {
+							response.setMessage("ERROR 511: "
+									+ ErrorMessage.ERROR_511);
+							return false;
 						}
 					}
 				}
-				response.setMessage("ERROR 511: " + ErrorMessage.ERROR_511);
+				response.setMessage("ERROR 675: " + ErrorMessage.ERROR_675);
 				return false;
 			}
 			response.setMessage("ERROR 675: " + ErrorMessage.ERROR_675);
@@ -221,8 +238,8 @@ public class WhatsAppManagment {
 				if (type.equals("Direct")) {
 					if (_Users.containsKey(target)) {
 						Message message = new Message(source, target, contect);
-						_Users.get(source).addMessageFromUser(message);
-						_Users.get(target).addMessageFromUser(message);
+						_Users.get(source).addMessage(message);
+						_Users.get(target).addMessage(message);
 						response.setMessage("Message Sent");
 						return true;
 					}
@@ -266,8 +283,8 @@ public class WhatsAppManagment {
 					Group group = _Groups.get(targetGroup);
 					if (group.isUserExistsInGroup(sourceUser)
 							&& _Users.containsKey(userPhone)) {
-						if (!group.isUserExistsInGroup(targetUser)) {
-							group.addUser(targetUser);
+						if (!group.isUserExistsInGroup(targetUser)
+								& group.addUser(targetUser)) {
 							response.setMessage(userPhone + " added to "
 									+ group.getGroupName());
 							return true;
@@ -275,6 +292,7 @@ public class WhatsAppManagment {
 						response.setMessage("ERROR 142: "
 								+ ErrorMessage.ERROR_142);
 						return false;
+
 					}
 					response.setMessage("ERROR 242: " + ErrorMessage.ERROR_242);
 					return false;
@@ -304,8 +322,8 @@ public class WhatsAppManagment {
 					Group group = _Groups.get(targetGroup);
 					if (group.getGroupManagerPhone().equals(
 							sourceUser.getPhone())) {
-						if (group.isUserExistsInGroup(targetUser)) {
-							group.removeUser(targetUser);
+						if (group.isUserExistsInGroup(targetUser)
+								& group.removeUser(targetUser)) {
 							response.setMessage(userPhone + " removed from "
 									+ group.getGroupName());
 							return true;

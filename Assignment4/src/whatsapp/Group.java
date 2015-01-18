@@ -31,11 +31,13 @@ public class Group {
 	 * @return boolean true if user added else false
 	 */
 	public boolean addUser(User user) {
-		if (_UsersInGroup.containsKey(user.getPhone())) {
-			return false;
+		synchronized (_UsersInGroup) {
+			if (_UsersInGroup.containsKey(user.getPhone())) {
+				return false;
+			}
+			_UsersInGroup.put(user.getPhone(), user);
+			return true;
 		}
-		_UsersInGroup.put(user.getPhone(), user);
-		return true;
 	}
 
 	/**
@@ -45,12 +47,14 @@ public class Group {
 	 * @return boolean true if user removed else false
 	 */
 	public boolean removeUser(User user) {
-		if (_UsersInGroup.containsKey(user.getPhone())
-				&& !_GroupManager.equals(user)) {
-			_UsersInGroup.remove(user.getPhone());
-			return true;
+		synchronized (_UsersInGroup) {
+			if (_UsersInGroup.containsKey(user.getPhone())
+					&& !_GroupManager.equals(user)) {
+				_UsersInGroup.remove(user.getPhone());
+				return true;
+			}
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -60,7 +64,7 @@ public class Group {
 	 */
 	public void addMessage(Message message) {
 		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
-			it.getValue().addMessageFromGroup(message);
+			it.getValue().addMessage(message);
 		}
 	}
 

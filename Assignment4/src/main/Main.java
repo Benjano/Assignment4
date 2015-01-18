@@ -84,12 +84,17 @@ public class Main {
 				requestSend);
 		whatsAppSendDirect.addValue("Type", "Direct");
 		whatsAppSendDirect.addValue("Target", "0545750068");
-		whatsAppSendDirect.addValue("Contect", "May I tell you something?");
+		whatsAppSendDirect.addValue("Content", "May I tell you something?");
 		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(
 						whatsAppSendDirect.toString(), whatsAppSendDirect)));
 
-		
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppSendDirect.toString(), whatsAppSendDirect)));
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppSendDirect.toString(), whatsAppSendDirect)));
 
 		HttpRequest requestAddUser = new HttpRequest(HttpType.POST,
 				"/add_user.jsp", "Http/1.1");
@@ -102,7 +107,7 @@ public class Main {
 		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppAddUser
 						.toString(), whatsAppAddUser)));
-		
+
 		WhatsAppHttpReqeust whatsAppSendGroup = new WhatsAppHttpReqeust(
 				requestSend);
 		whatsAppSendGroup.addValue("Type", "Group");
@@ -111,7 +116,6 @@ public class Main {
 		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppSendGroup
 						.toString(), whatsAppSendGroup)));
-		
 
 		HttpRequest requestRemoveUser2 = new HttpRequest(HttpType.POST,
 				"/remove_user.jsp", "Http/1.1");
@@ -148,15 +152,22 @@ public class Main {
 						.toString(), whatsAppQueue1)));
 
 		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(
+						whatsAppSendDirect.toString(), whatsAppSendDirect)));
+
+		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppQueue1
 						.toString(), whatsAppQueue1)));
 
 		HttpRequest requestQueue2 = new HttpRequest(HttpType.GET, "/queue.jsp",
 				"Http/1.1");
-		requestQueue2.addHeader("Cookie", "3");
+		requestQueue2.addHeader("Cookie", "2");
 
 		WhatsAppHttpReqeust whatsAppQueue2 = new WhatsAppHttpReqeust(
 				requestQueue2);
+		System.out.println(serverProtocol
+				.processMessage(new MessageImpl<HttpProtocol>(whatsAppQueue2
+						.toString(), whatsAppQueue2)));
 		System.out.println(serverProtocol
 				.processMessage(new MessageImpl<HttpProtocol>(whatsAppQueue2
 						.toString(), whatsAppQueue2)));
