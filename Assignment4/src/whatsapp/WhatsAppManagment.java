@@ -242,7 +242,7 @@ public class WhatsAppManagment {
 			if (target != null && type != null && contect != null) {
 				if (type.equals("Direct")) {
 					if (_Users.containsKey(target)) {
-						Message message = new Message(source, target, contect);
+						MessageWhatsApp message = new MessageWhatsApp(source, target, contect);
 						_Users.get(source).addMessage(message);
 						_Users.get(target).addMessage(message);
 						response.setMessage("Message Sent");
@@ -253,7 +253,7 @@ public class WhatsAppManagment {
 				} else if (type.equals("Group")) {
 					if (_Groups.containsKey(target)) {
 						if (validateUserInGroup(target, source)) {
-							Message message = new Message(source, target,
+							MessageWhatsApp message = new MessageWhatsApp(source, target,
 									contect);
 							_Groups.get(target).addMessage(message);
 							response.setMessage("Message Sent");
@@ -357,11 +357,11 @@ public class WhatsAppManagment {
 			WhatsAppHttpResponse response) {
 		String cookie = request.getHeader(HEADER_COOKIE);
 		if (validateCookie(cookie)) {
-			List<Message> messages = _CurrentLoggedUsers.get(cookie)
+			List<MessageWhatsApp> messages = _CurrentLoggedUsers.get(cookie)
 					.getNewMessages();
 			String result = "";
 			if (!messages.isEmpty()) {
-				for (Message message : messages) {
+				for (MessageWhatsApp message : messages) {
 					result += message + "\n";
 				}
 				result = result.substring(0, result.length() - 1);

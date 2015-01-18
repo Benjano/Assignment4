@@ -60,7 +60,7 @@ public class Group {
 	 * 
 	 * @param message
 	 */
-	public void addMessage(Message message) {
+	public void addMessage(MessageWhatsApp message) {
 		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
 			it.getValue().addMessage(message);
 		}

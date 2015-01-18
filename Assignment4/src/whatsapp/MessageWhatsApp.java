@@ -4,13 +4,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Message {
+public class MessageWhatsApp {
 
 	private Date _Time;
 	private String _Source, _Target;
 	private String _Message;
 
-	public Message(String source, String target, String message) {
+	public MessageWhatsApp(String source, String target, String message) {
 		_Source = source;
 		_Target = target;
 		_Time = Calendar.getInstance().getTime();

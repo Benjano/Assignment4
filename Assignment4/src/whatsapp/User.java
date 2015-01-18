@@ -15,9 +15,9 @@ public class User {
 	private Map<String, Group> _UserGroups;
 
 	// <Target, List of messages> The messages of the user
-	private Queue<Message> _Messages;
-	private Map<String, List<Message>> _MessagesRead;
-	private Map<String, List<Message>> _MessagesRecieved;
+	private Queue<MessageWhatsApp> _Messages;
+	private Map<String, List<MessageWhatsApp>> _MessagesRead;
+	private Map<String, List<MessageWhatsApp>> _MessagesRecieved;
 
 	/**
 	 * Constuctor
@@ -29,9 +29,9 @@ public class User {
 		_Name = name;
 		_Phone = phone;
 		_UserGroups = new ConcurrentHashMap<String, Group>();
-		_MessagesRead = new ConcurrentHashMap<String, List<Message>>();
-		_MessagesRecieved = new ConcurrentHashMap<String, List<Message>>();
-		_Messages = new ConcurrentLinkedQueue<Message>();
+		_MessagesRead = new ConcurrentHashMap<String, List<MessageWhatsApp>>();
+		_MessagesRecieved = new ConcurrentHashMap<String, List<MessageWhatsApp>>();
+		_Messages = new ConcurrentLinkedQueue<MessageWhatsApp>();
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class User {
 	//
 	// }
 
-	public void addMessage(Message message) {
+	public void addMessage(MessageWhatsApp message) {
 		_Messages.add(message);
 	}
 
@@ -141,8 +141,8 @@ public class User {
 		return _Phone;
 	}
 
-	public synchronized List<Message> getNewMessages() {
-		List<Message> result = new Vector<Message>();
+	public synchronized List<MessageWhatsApp> getNewMessages() {
+		List<MessageWhatsApp> result = new Vector<MessageWhatsApp>();
 		while (!_Messages.isEmpty()) {
 			result.add(_Messages.poll());
 		}
@@ -164,7 +164,7 @@ public class User {
 	public String getMessages(String target) {
 		StringBuilder builder = new StringBuilder();
 		if (_MessagesRead.containsKey(target)) {
-			for (Message message : _MessagesRead.get(target)) {
+			for (MessageWhatsApp message : _MessagesRead.get(target)) {
 				builder.append(message);
 			}
 		}
