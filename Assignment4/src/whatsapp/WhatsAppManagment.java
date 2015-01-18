@@ -325,9 +325,7 @@ public class WhatsAppManagment {
 				User targetUser = _Users.get(userPhone);
 				if (_Groups.containsKey(targetGroup)) {
 					Group group = _Groups.get(targetGroup);
-					if (group.getGroupManagerPhone().equals(
-							sourceUser.getPhone())) {
-						if (group.isUserExistsInGroup(targetUser)) {
+						if (group.isUserExistsInGroup(targetUser) && group.isUserExistsInGroup(sourceUser)) {
 							if (group.removeUser(targetUser)) {
 								response.setMessage(userPhone
 										+ " removed from "
@@ -344,9 +342,7 @@ public class WhatsAppManagment {
 								+ ErrorMessage.ERROR_769);
 						return false;
 					}
-					response.setMessage("ERROR 668: " + ErrorMessage.ERROR_668);
-					return false;
-				}
+			
 				response.setMessage("ERROR 769: " + ErrorMessage.ERROR_769);
 				return false;
 			}
@@ -385,14 +381,6 @@ public class WhatsAppManagment {
 		if (_Groups.containsKey(groupName) && _Users.containsKey(userPhone)) {
 			return _Groups.get(groupName).isUserExistsInGroup(
 					_Users.get(userPhone));
-		}
-		return false;
-	}
-
-	public boolean validateGroupManager(String groupName, String userPhone) {
-		if (_Groups.containsKey(groupName) && _Users.containsKey(userPhone)) {
-			return _Groups.get(groupName).getGroupManagerPhone()
-					.equals(userPhone);
 		}
 		return false;
 	}

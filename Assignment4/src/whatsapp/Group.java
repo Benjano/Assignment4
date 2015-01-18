@@ -8,20 +8,18 @@ public class Group {
 
 	// ********** Members **********
 	private String _GroupName;
-	private User _GroupManager;
 	private Map<String, User> _UsersInGroup;
 
 	/**
 	 * Constuctor
 	 * 
 	 * @param name
-	 * @param manager
+	 * @param creator
 	 */
-	public Group(String name, User manager) {
+	public Group(String name, User creator) {
 		_GroupName = name;
-		_GroupManager = manager;
 		_UsersInGroup = new ConcurrentHashMap<String, User>();
-		addUser(manager);
+		addUser(creator);
 	}
 
 	/**
@@ -48,9 +46,7 @@ public class Group {
 	 */
 	public boolean removeUser(User user) {
 		synchronized (_UsersInGroup) {
-			if (_UsersInGroup.containsKey(user.getPhone())
-					&& (_UsersInGroup.size() > 1 && !_GroupManager.equals(user))
-					|| (_UsersInGroup.size() == 1 && _GroupManager.equals(user))) {
+			if (_UsersInGroup.containsKey(user.getPhone())) {
 				_UsersInGroup.remove(user.getPhone());
 				user.removeGroup(_GroupName);
 				return true;
@@ -80,24 +76,6 @@ public class Group {
 	}
 
 	/**
-	 * Return the name of the group manager
-	 * 
-	 * @return String name
-	 */
-	public String getGroupManagerName() {
-		return _GroupManager.getName();
-	}
-
-	/**
-	 * Return the phone of the group manager
-	 * 
-	 * @return String phone
-	 */
-	public String getGroupManagerPhone() {
-		return _GroupManager.getPhone();
-	}
-
-	/**
 	 * Check if the user exists in group.
 	 * 
 	 * @param user
@@ -106,8 +84,10 @@ public class Group {
 	public boolean isUserExistsInGroup(User user) {
 		return _UsersInGroup.containsKey(user.getPhone());
 	}
+
 	/**
 	 * Check if the goup is empty
+	 * 
 	 * @return
 	 */
 	public boolean isEmpty() {
@@ -117,13 +97,14 @@ public class Group {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(_GroupManager.getPhone());
 		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
-			if (!it.getValue().equals(_GroupManager))
-				builder.append(",").append(it.getKey());
+			builder.append(it.getKey()).append(",");
 		}
-		return builder.toString();
+		String result = builder.toString();
+		if (result.length() > 0) {
+			result = result.substring(0, result.length() - 1);
+		}
+		return result;
 	}
-
 
 }

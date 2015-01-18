@@ -54,9 +54,9 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 
 	public static void main(String[] args) throws IOException {
 		// Get port
-		// int port = Integer.decode(args[0]).intValue();
+		 int port = Integer.decode(args[0]).intValue();
 
-		int port = 5555;
+//		int port = 5555;
 		// MultipleClientProtocolServer server = new
 		// MultipleClientProtocolServer(port, new HttpProtocolFactory(), new
 		// HttpTokenizerFactory());
