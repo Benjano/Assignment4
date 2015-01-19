@@ -60,7 +60,7 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 		synchronized (serverSocket) {
 			serverSocket.notifyAll();	
 		}
-		System.out.println("Closing " + _handlers.size() + " connections");
+		System.out.println("Closing all connections");
 		for (ConnectionHandler<T> handler : _handlers) {
 			handler.close();
 		}

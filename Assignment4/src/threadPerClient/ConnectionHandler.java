@@ -66,7 +66,6 @@ public class ConnectionHandler<T> implements Runnable {
 			if (protocol.isEnd(msg)) {
 				break;
 			}
-
 		}
 	}
 
