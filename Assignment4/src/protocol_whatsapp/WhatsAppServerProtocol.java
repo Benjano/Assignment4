@@ -35,7 +35,7 @@ public class WhatsAppServerProtocol implements
 			WhatsAppHttpReqeust request = (WhatsAppHttpReqeust) (msg.getValue());
 			response.setResultCode(HttpResultCode.RESULT_OK);
 
-			if (!validateRequest(request)) {
+			if (request == null || !validateRequest(request)) {
 				response.setResultCode(HttpResultCode.RESULT_BAD_REQUEST);
 				response.setMessage("Your request is not a valid http request");
 				return response.getMessage();
@@ -88,9 +88,10 @@ public class WhatsAppServerProtocol implements
 
 	// Check if the request is written in HttpProtocol
 	private boolean validateRequest(WhatsAppHttpReqeust request) {
-		if (request.getHttpVersion() != null
-				&& !request.getHttpVersion().toUpperCase().equals("HTTP/1.1")
-				|| request.getReqeustType() == HttpType.BAD_REQUEST)
+		if (request != null
+				&& (request.getHttpVersion() != null
+						&& !request.getHttpVersion().toUpperCase()
+								.equals("HTTP/1.1") || request.getReqeustType() == HttpType.BAD_REQUEST))
 			return false;
 		return true;
 	}

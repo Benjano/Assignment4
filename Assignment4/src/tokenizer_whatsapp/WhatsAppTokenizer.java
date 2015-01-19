@@ -15,7 +15,7 @@ public class WhatsAppTokenizer extends HttpTokenizer<HttpProtocol> {
 	public Message<HttpProtocol> nextMessage() {
 
 		Message<HttpProtocol> httpMessage = super.nextMessage();
-		
+
 		if (httpMessage != null && httpMessage.getValue() != null) {
 
 			WhatsAppHttpReqeust whatsAppRequest = new WhatsAppHttpReqeust(

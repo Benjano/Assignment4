@@ -56,13 +56,16 @@ public class MultipleClientProtocolServer<T> implements Runnable {
 	}
 
 	// Closes the connection
-	public void close() throws IOException {
-		serverSocket.close();
+	public  void close() throws IOException {
+		synchronized (serverSocket) {
+			serverSocket.notifyAll();	
+		}
 		System.out.println("Closing " + _handlers.size() + " connections");
 		for (ConnectionHandler<T> handler : _handlers) {
 			handler.close();
 		}
 		System.out.println("All connections were closed ");
+		serverSocket.close();
 	}
 
 	public static void main(String[] args) throws IOException {

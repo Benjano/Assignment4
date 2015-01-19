@@ -71,8 +71,8 @@ public class WhatsAppManagment {
 	}
 
 	private String generateCookieCode(String name, String phone) {
-		// return new BigInteger(30, random).toString(32) + phone;
-		return _Users.size() + "";
+		 return new BigInteger(30, random).toString(32) + phone;
+//		return _Users.size() + "";
 	}
 
 	private User getUserCreateIfNotExists(String name, String phone) {
@@ -243,7 +243,7 @@ public class WhatsAppManagment {
 				if (type.equals("Direct")) {
 					if (_Users.containsKey(target)) {
 						MessageWhatsApp message = new MessageWhatsApp(source, target, contect);
-						_Users.get(source).addMessage(message);
+//						_Users.get(source).addMessage(message);
 						_Users.get(target).addMessage(message);
 						response.setMessage("Message Sent");
 						return true;

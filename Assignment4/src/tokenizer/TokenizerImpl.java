@@ -34,6 +34,8 @@ public class TokenizerImpl<T> implements Tokenizer<Message<T>> {
 			_isClosed = true;
 			return null;
 		}
+		if (builder.toString().length() < 10)
+			return null;
 		return new MessageImpl<T>(builder.toString());
 
 	}

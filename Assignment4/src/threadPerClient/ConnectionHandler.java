@@ -88,8 +88,10 @@ public class ConnectionHandler<T> implements Runnable {
 			if (tokenizer.isAlive())// Handle this in tokenizer
 			{
 				in.close();
+
 			}
 			if (out != null) {
+				out.println("shutdown");
 				out.close();
 			}
 

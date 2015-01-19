@@ -21,7 +21,8 @@ public class HttpTokenizer<T> extends TokenizerImpl<HttpProtocol> {
 
 			StringTokenizer tokenizer = new StringTokenizer(rawMessage);
 
-			String location, httpVersion;
+			String location = "";
+			String httpVersion = "";
 			HttpType requestType = HttpType.BAD_REQUEST;
 
 			if (tokenizer.countTokens() >= 3) {
@@ -78,8 +79,6 @@ public class HttpTokenizer<T> extends TokenizerImpl<HttpProtocol> {
 				}
 
 				return new MessageImpl<HttpProtocol>(rawMessage, request);
-			} else {
-				return null;
 			}
 		}
 		return message;
