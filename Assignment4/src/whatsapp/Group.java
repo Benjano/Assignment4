@@ -1,6 +1,5 @@
 package whatsapp;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,8 +60,10 @@ public class Group {
 	 * @param message
 	 */
 	public void addMessage(MessageWhatsApp message) {
-		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
-			it.getValue().addMessage(message);
+		synchronized (_UsersInGroup) {
+			for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
+				it.getValue().addMessage(message);
+			}
 		}
 	}
 
@@ -71,7 +72,7 @@ public class Group {
 	 * 
 	 * @return String name
 	 */
-	public String getGroupName() {
+	public synchronized String getGroupName() {
 		return _GroupName;
 	}
 
@@ -82,7 +83,9 @@ public class Group {
 	 * @return boolean true if the user exists else false
 	 */
 	public boolean isUserExistsInGroup(User user) {
-		return _UsersInGroup.containsKey(user.getPhone());
+		synchronized (_UsersInGroup) {
+			return _UsersInGroup.containsKey(user.getPhone());
+		}
 	}
 
 	/**
@@ -91,20 +94,24 @@ public class Group {
 	 * @return
 	 */
 	public boolean isEmpty() {
-		return _UsersInGroup.isEmpty();
+		synchronized (_UsersInGroup) {
+			return _UsersInGroup.isEmpty();
+		}
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
-			builder.append(it.getKey()).append(",");
+		synchronized (_UsersInGroup) {
+			StringBuilder builder = new StringBuilder();
+			for (Map.Entry<String, User> it : _UsersInGroup.entrySet()) {
+				builder.append(it.getKey()).append(",");
+			}
+			String result = builder.toString();
+			if (result.length() > 0) {
+				result = result.substring(0, result.length() - 1);
+			}
+			return result;
 		}
-		String result = builder.toString();
-		if (result.length() > 0) {
-			result = result.substring(0, result.length() - 1);
-		}
-		return result;
 	}
 
 }

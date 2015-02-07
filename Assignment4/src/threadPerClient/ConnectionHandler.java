@@ -33,8 +33,6 @@ public class ConnectionHandler<T> implements Runnable {
 
 	public void run() {
 
-		// T msg;
-
 		try {
 			initialize();
 		} catch (IOException e) {

@@ -71,20 +71,22 @@ public class WhatsAppManagment {
 	}
 
 	private String generateCookieCode(String name, String phone) {
-		 return new BigInteger(30, random).toString(32) + phone;
-//		return _Users.size() + "";
+		return new BigInteger(30, random).toString(32) + phone;
+		// return _Users.size() + "";
 	}
 
 	private User getUserCreateIfNotExists(String name, String phone) {
-		if (_Users.containsKey(phone)) {
-			return _Users.get(phone);
+		synchronized (_Users) {
+			if (_Users.containsKey(phone)) {
+				return _Users.get(phone);
+			}
+			User user = new User(name, phone);
+			_Users.put(phone, user);
+			return user;
 		}
-		User user = new User(name, phone);
-		_Users.put(phone, user);
-		return user;
 	}
 
-	private User getUserByName(String name) {
+	private synchronized User getUserByName(String name) {
 		for (Map.Entry<String, User> it : _Users.entrySet()) {
 			if (it.getValue().getName().equals(name)) {
 				User user = it.getValue();
@@ -105,7 +107,8 @@ public class WhatsAppManagment {
 			if (user.getName().equals(name)) {
 				String auth = generateCookieCode(name, phone);
 				synchronized (user) {
-					_CurrentLoggedUsers.put(auth, user);
+					if (!_CurrentLoggedUsers.containsKey(auth))
+						_CurrentLoggedUsers.put(auth, user);
 				}
 				response.addHeader("Set-Cookie", "user_auth" + "&" + auth);
 				response.setMessage("Welcome " + user);
@@ -132,7 +135,8 @@ public class WhatsAppManagment {
 			response.setMessage("Goodbye");
 			User user = _CurrentLoggedUsers.get(cookie);
 			synchronized (user) {
-				_CurrentLoggedUsers.remove(cookie);
+				if (_CurrentLoggedUsers.containsKey(cookie))
+					_CurrentLoggedUsers.remove(cookie);
 			}
 			return true;
 		}
@@ -146,27 +150,32 @@ public class WhatsAppManagment {
 			if (value != null) {
 				if (value.equals("Users")) {
 					String users = "";
-					for (Map.Entry<String, User> it : _Users.entrySet()) {
-						users += it.getValue() + "\n";
+					synchronized (_Users) {
+						for (Map.Entry<String, User> it : _Users.entrySet()) {
+							users += it.getValue() + "\n";
+						}
+						// Remove the last \n
+						users = users.substring(0, users.length() - 1);
 					}
-					// Remove the last \n
-					users = users.substring(0, users.length() - 1);
 					response.setMessage(users);
 					return true;
 				} else if (value.equals("Group")) {
 					value = request.getValue("Group");
-					if (value != null && _Groups.containsKey(value)) {
-						response.setMessage(_Groups.get(value).toString());
-						return true;
-					} else {
+					synchronized (_Groups) {
+						if (value != null && _Groups.containsKey(value)) {
+							response.setMessage(_Groups.get(value).toString());
+							return true;
+						}
 						response.setMessage("ERROR 609: "
 								+ ErrorMessage.ERROR_609);
 						return false;
 					}
 				} else if (value.equals("Groups")) {
 					String groups = "";
-					for (Map.Entry<String, Group> it : _Groups.entrySet()) {
-						groups += it.getKey() + ": " + it.getValue() + "\n";
+					synchronized (_Groups) {
+						for (Map.Entry<String, Group> it : _Groups.entrySet()) {
+							groups += it.getKey() + ": " + it.getValue() + "\n";
+						}
 					}
 					// Remove the last \n
 					if (groups.length() > 0) {
@@ -207,18 +216,19 @@ public class WhatsAppManagment {
 						if (!_Groups.containsKey(groupName)) {
 							_Groups.put(groupName, new Group(groupName,
 									_CurrentLoggedUsers.get(cookie)));
-							Group group = _Groups.get(groupName);
-							for (User user : usersList) {
-								group.addUser(user);
-							}
-							response.setMessage("Group " + groupName
-									+ " Created");
-							return true;
 						} else {
 							response.setMessage("ERROR 511: "
 									+ ErrorMessage.ERROR_511);
 							return false;
 						}
+					}
+					Group group = _Groups.get(groupName);
+					synchronized (group) {
+						for (User user : usersList) {
+							group.addUser(user);
+						}
+						response.setMessage("Group " + groupName + " Created");
+						return true;
 					}
 				}
 				response.setMessage("ERROR 675: " + ErrorMessage.ERROR_675);
@@ -242,8 +252,8 @@ public class WhatsAppManagment {
 			if (target != null && type != null && contect != null) {
 				if (type.equals("Direct")) {
 					if (_Users.containsKey(target)) {
-						MessageWhatsApp message = new MessageWhatsApp(source, target, contect);
-//						_Users.get(source).addMessage(message);
+						MessageWhatsApp message = new MessageWhatsApp(source,
+								target, contect);
 						_Users.get(target).addMessage(message);
 						response.setMessage("Message Sent");
 						return true;
@@ -252,12 +262,15 @@ public class WhatsAppManagment {
 					return false;
 				} else if (type.equals("Group")) {
 					if (_Groups.containsKey(target)) {
-						if (validateUserInGroup(target, source)) {
-							MessageWhatsApp message = new MessageWhatsApp(source, target,
-									contect);
-							_Groups.get(target).addMessage(message);
-							response.setMessage("Message Sent");
-							return true;
+						Group group = _Groups.get(target);
+						synchronized (group) {
+							if (validateUserInGroup(target, source)) {
+								MessageWhatsApp message = new MessageWhatsApp(
+										source, target, contect);
+								_Groups.get(target).addMessage(message);
+								response.setMessage("Message Sent");
+								return true;
+							}
 						}
 					}
 					response.setMessage("ERROR 771: " + ErrorMessage.ERROR_771);
@@ -286,21 +299,24 @@ public class WhatsAppManagment {
 				User targetUser = _Users.get(userPhone);
 				if (_Groups.containsKey(targetGroup)) {
 					Group group = _Groups.get(targetGroup);
-					if (group.isUserExistsInGroup(sourceUser)
-							&& _Users.containsKey(userPhone)) {
-						if (!group.isUserExistsInGroup(targetUser)
-								& group.addUser(targetUser)) {
-							response.setMessage(userPhone + " added to "
-									+ group.getGroupName());
-							return true;
-						}
-						response.setMessage("ERROR 142: "
-								+ ErrorMessage.ERROR_142);
-						return false;
+					synchronized (group) {
+						if (group.isUserExistsInGroup(sourceUser)
+								&& _Users.containsKey(userPhone)) {
+							if (!group.isUserExistsInGroup(targetUser)
+									& group.addUser(targetUser)) {
+								response.setMessage(userPhone + " added to "
+										+ group.getGroupName());
+								return true;
+							}
+							response.setMessage("ERROR 142: "
+									+ ErrorMessage.ERROR_142);
+							return false;
 
+						}
+						response.setMessage("ERROR 242: "
+								+ ErrorMessage.ERROR_242);
+						return false;
 					}
-					response.setMessage("ERROR 242: " + ErrorMessage.ERROR_242);
-					return false;
 				}
 				response.setMessage("ERROR 770: " + ErrorMessage.ERROR_770);
 				return false;
@@ -325,7 +341,9 @@ public class WhatsAppManagment {
 				User targetUser = _Users.get(userPhone);
 				if (_Groups.containsKey(targetGroup)) {
 					Group group = _Groups.get(targetGroup);
-						if (group.isUserExistsInGroup(targetUser) && group.isUserExistsInGroup(sourceUser)) {
+					synchronized (group) {
+						if (group.isUserExistsInGroup(targetUser)
+								&& group.isUserExistsInGroup(sourceUser)) {
 							if (group.removeUser(targetUser)) {
 								response.setMessage(userPhone
 										+ " removed from "
@@ -342,7 +360,7 @@ public class WhatsAppManagment {
 								+ ErrorMessage.ERROR_769);
 						return false;
 					}
-			
+				}
 				response.setMessage("ERROR 769: " + ErrorMessage.ERROR_769);
 				return false;
 			}
@@ -378,18 +396,25 @@ public class WhatsAppManagment {
 	// ************** VALIDATE METHODS **************
 
 	public boolean validateUserInGroup(String groupName, String userPhone) {
-		if (_Groups.containsKey(groupName) && _Users.containsKey(userPhone)) {
-			return _Groups.get(groupName).isUserExistsInGroup(
-					_Users.get(userPhone));
+		synchronized (_Groups) {
+			synchronized (_Users) {
+				if (_Groups.containsKey(groupName)
+						&& _Users.containsKey(userPhone)) {
+					return _Groups.get(groupName).isUserExistsInGroup(
+							_Users.get(userPhone));
+				}
+				return false;
+			}
 		}
-		return false;
 	}
 
 	public boolean validateCookie(String cookie) {
-		if (cookie != null & validateHeader(cookie)) {
-			return _CurrentLoggedUsers.containsKey(cookie);
+		synchronized (_CurrentLoggedUsers) {
+			if (cookie != null & validateHeader(cookie)) {
+				return _CurrentLoggedUsers.containsKey(cookie);
+			}
+			return false;
 		}
-		return false;
 	}
 
 	private boolean validateHeader(String header) {
